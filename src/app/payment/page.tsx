@@ -1,8 +1,14 @@
 import { BankAccountCard } from "@/app/_components/payment/bank-account-card";
+import { UpiAccountCard } from "@/app/_components/payment/upi-account-card";
 import { api } from "@/trpc/server";
 
 export default async function PaymentPage() {
-	const accounts = await api.bankAccount.list();
+	const [accounts, upiAccounts] = await Promise.all([
+		api.bankAccount.list(),
+		api.upiAccount.list(),
+	]);
+
+	const hasAny = accounts.length > 0 || upiAccounts.length > 0;
 
 	return (
 		<div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
@@ -17,14 +23,17 @@ export default async function PaymentPage() {
 				</p>
 			</div>
 
-			{accounts.length === 0 ? (
+			{!hasAny ? (
 				<p className="mt-10 text-center text-[#14163A]/55 text-sm">
-					No bank accounts have been added yet.
+					No payment methods have been added yet.
 				</p>
 			) : (
 				<div className="mt-10 grid gap-6 sm:grid-cols-2">
 					{accounts.map((account) => (
 						<BankAccountCard account={account} key={account.id} />
+					))}
+					{upiAccounts.map((account) => (
+						<UpiAccountCard account={account} key={account.id} />
 					))}
 				</div>
 			)}

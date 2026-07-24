@@ -265,8 +265,17 @@ export const bankAccount = createTable("bank_account", {
 	isActive: boolean("is_active").notNull().default(true),
 });
 
-// src/server/db/schema.ts — inside siteSetting, add:
-// src/server/db/schema.ts — add to siteSetting:
+export const upiAccount = createTable("upi_account", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	label: text("label").notNull(), // e.g. "Google Pay"
+	upiId: text("upi_id"), // e.g. "9626965591@okicici" — optional, phone-only UPI is common
+	phoneNumber: text("phone_number").notNull(), // e.g. "9626965591"
+	sortOrder: integer("sort_order").notNull().default(0),
+	isActive: boolean("is_active").notNull().default(true),
+});
+
 export const siteSetting = createTable("site_setting", {
 	id: integer("id").primaryKey().default(1),
 	shopName: text("shop_name").notNull().default("Sri's Crackers Shop"),
