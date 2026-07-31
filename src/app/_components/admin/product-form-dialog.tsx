@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { type ComponentProps, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -109,6 +109,35 @@ function defaultsFor(product?: ProductFormProduct): ProductFormValues {
 		sortOrder: product?.sortOrder ?? 0,
 		isActive: product?.isActive ?? true,
 	};
+}
+
+// Renders 0 as an empty string in the input so the user isn't stuck deleting
+// a leading "0" before they can type — but keeps the underlying field value
+// numeric for validation/submission.
+function ZeroableNumberInput({
+	value = 0,
+	onChange,
+	...rest
+}: Omit<ComponentProps<typeof Input>, "value" | "onChange"> & {
+	value?: number;
+	onChange: (value: number) => void;
+}) {
+	return (
+		<Input
+			{...rest}
+			onChange={(e) => {
+				const raw = e.target.value;
+				onChange(raw === "" ? 0 : Number(raw));
+			}}
+			onFocus={(e) => {
+				// Select all so typing immediately replaces the 0, in case
+				// the value wasn't already blank (e.g. tabbed in vs clicked).
+				if (e.target.value === "0") e.target.select();
+			}}
+			type="number"
+			value={value === 0 ? "" : value}
+		/>
+	);
 }
 
 export function ProductFormDialog({
@@ -299,7 +328,11 @@ export function ProductFormDialog({
 									<FormItem>
 										<FormLabel>MRP price (₹)</FormLabel>
 										<FormControl>
-											<Input step="0.01" type="number" {...field} />
+											<ZeroableNumberInput
+												onChange={field.onChange}
+												step="0.01"
+												value={field.value}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -312,7 +345,11 @@ export function ProductFormDialog({
 									<FormItem>
 										<FormLabel>Discount price (₹)</FormLabel>
 										<FormControl>
-											<Input step="0.01" type="number" {...field} />
+											<ZeroableNumberInput
+												onChange={field.onChange}
+												step="0.01"
+												value={field.value}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>
@@ -373,7 +410,10 @@ export function ProductFormDialog({
 									<FormItem>
 										<FormLabel>Sort order</FormLabel>
 										<FormControl>
-											<Input type="number" {...field} />
+											<ZeroableNumberInput
+												onChange={field.onChange}
+												value={field.value}
+											/>
 										</FormControl>
 										<FormMessage />
 									</FormItem>

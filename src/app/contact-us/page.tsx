@@ -4,7 +4,7 @@ import { DiyaWatermark } from "@/app/_components/layout/diya-watermark";
 export default function ContactUsPage() {
 	return (
 		<div className="relative overflow-hidden">
-			<DiyaWatermark className="pointer-events-none absolute inset-0 h-full w-full" />
+			<DiyaWatermark className="pointer-events-none absolute top-1/2 right-0 h-[520px] w-[520px] translate-x-1/4 -translate-y-1/2 opacity-80 sm:h-[640px] sm:w-[640px]" />
 
 			<div className="relative mx-auto max-w-5xl px-4 py-14 text-center sm:px-6">
 				<h1 className="font-extrabold text-3xl text-[#14163A] sm:text-4xl">

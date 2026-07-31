@@ -43,11 +43,13 @@ const styles = StyleSheet.create({
 		color: "#fff",
 		paddingVertical: 6,
 	},
-	cCode: { width: "8%", paddingHorizontal: 4 },
-	cName: { width: "44%", paddingHorizontal: 4 },
-	cUnit: { width: "12%", paddingHorizontal: 4 },
-	cMrp: { width: "18%", textAlign: "right", paddingHorizontal: 4 },
-	cPrice: { width: "18%", textAlign: "right", paddingHorizontal: 4 },
+	cCode: { width: "7%", paddingHorizontal: 4 },
+	cName: { width: "34%", paddingHorizontal: 4 },
+	cUnit: { width: "10%", paddingHorizontal: 4 },
+	cMrp: { width: "15%", textAlign: "right", paddingHorizontal: 4 },
+	cPrice: { width: "15%", textAlign: "right", paddingHorizontal: 4 },
+	cQty: { width: "9%", textAlign: "right", paddingHorizontal: 4 },
+	cTotal: { width: "10%", textAlign: "right", paddingHorizontal: 4 },
 	mrpText: { color: "#888", textDecoration: "line-through" },
 	discountText: { color: "#C8202F", fontWeight: 700 },
 	footer: {
@@ -111,6 +113,8 @@ export function PriceListDocument({ data }: { data: PriceListDocumentData }) {
 					<Text style={styles.cUnit}>Unit</Text>
 					<Text style={styles.cMrp}>MRP</Text>
 					<Text style={styles.cPrice}>Our Price</Text>
+					<Text style={styles.cQty}>Qty</Text>
+					<Text style={styles.cTotal}>Total</Text>
 				</View>
 
 				{/* Groups */}
@@ -136,6 +140,8 @@ export function PriceListDocument({ data }: { data: PriceListDocumentData }) {
 								<Text style={[styles.cPrice, styles.discountText]}>
 									₹{item.discountPrice}
 								</Text>
+								<Text style={styles.cQty}></Text>
+								<Text style={styles.cTotal}></Text>
 							</View>
 						))}
 					</View>

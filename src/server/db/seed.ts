@@ -159,13 +159,13 @@ function img(filename: string): string | null {
 async function seedAdmin() {
 	const [existingAdmin] = await db.select().from(user).limit(1);
 	if (existingAdmin) {
-		console.log("✓ Admin user already exists, skipping");
+		console.log("\u2713 Admin user already exists, skipping");
 		return;
 	}
 
 	if (!env.INITIAL_ADMIN_EMAIL || !env.INITIAL_ADMIN_PASSWORD) {
 		console.warn(
-			"⚠ INITIAL_ADMIN_EMAIL / INITIAL_ADMIN_PASSWORD not set — skipping admin creation",
+			"\u26a0 INITIAL_ADMIN_EMAIL / INITIAL_ADMIN_PASSWORD not set \u2014 skipping admin creation",
 		);
 		return;
 	}
@@ -177,7 +177,7 @@ async function seedAdmin() {
 			name: env.INITIAL_ADMIN_NAME ?? "Admin",
 		},
 	});
-	console.log(`✓ Created admin user: ${env.INITIAL_ADMIN_EMAIL}`);
+	console.log(`\u2713 Created admin user: ${env.INITIAL_ADMIN_EMAIL}`);
 }
 
 // ── Site settings ─────────────────────────────────────────────
@@ -188,7 +188,7 @@ async function seedSettings() {
 		.where(eq(siteSetting.id, 1))
 		.limit(1);
 	if (existing) {
-		console.log("✓ Site settings already exist, skipping");
+		console.log("\u2713 Site settings already exist, skipping");
 		return;
 	}
 
@@ -200,16 +200,16 @@ async function seedSettings() {
 		whatsappNumber: "9626965591",
 		contactPhonePrimary: "9626965591",
 		contactPhoneSecondary: "8248459275",
-		announcementText: "Welcome to Sri's Crackers Shop — Discount Live!",
+		announcementText: "Welcome to Sri's Crackers Shop \u2014 Discount Live!",
 	});
-	console.log("✓ Seeded site settings");
+	console.log("\u2713 Seeded site settings");
 }
 
 // ── Bank accounts ─────────────────────────────────────────────
 async function seedBankAccounts() {
 	const [existing] = await db.select().from(bankAccount).limit(1);
 	if (existing) {
-		console.log("✓ Bank accounts already exist, skipping");
+		console.log("\u2713 Bank accounts already exist, skipping");
 		return;
 	}
 
@@ -230,35 +230,38 @@ async function seedBankAccounts() {
 			sortOrder: 1,
 		},
 	]);
-	console.log("✓ Seeded bank accounts");
+	console.log("\u2713 Seeded bank accounts");
 }
 
 // ── Categories ─────────────────────────────────────────────────
+// discountLabel is now per-category: 90% for regular catalog items,
+// null for Gift Box (fixed prices, no discount) and Combo Pack (fixed case prices).
 const CATEGORY_SEED = [
-	{ name: "One Sound Crackers", slug: "one-sound-crackers" },
-	{ name: "Flower Pots (10pcs)", slug: "flower-pots" },
-	{ name: "Ground Chakkars", slug: "ground-chakkars" },
-	{ name: "Sparklers", slug: "sparklers" },
-	{ name: "Pencil Sparkling Varieties", slug: "pencil-sparkling-varieties" },
-	{ name: "Sky Rockets", slug: "sky-rockets" },
-	{ name: "Bijili Crackers", slug: "bijili-crackers" },
-	{ name: "Bomb Crackers", slug: "bomb-crackers" },
-	{ name: "Paper Bomb", slug: "paper-bomb" },
-	{ name: "Wala Garland", slug: "wala-garland" },
-	{ name: "Sky Night Celebration", slug: "sky-night-celebration" },
-	{ name: "Night Fancy Celebration", slug: "night-fancy-celebration" },
-	{ name: "Fancy Flower Balls", slug: "fancy-flower-balls" },
-	{ name: "Color Matches", slug: "color-matches" },
-	{ name: "Children Gun Items", slug: "children-gun-items" },
-	{ name: "New Arrivals", slug: "new-arrivals" },
-	{ name: "New Arrivals 2026", slug: "new-arrivals-2026" },
-	{ name: "Combo Pack", slug: "combo-pack" },
+	{ name: "One Sound Crackers", slug: "one-sound-crackers", discountLabel: "90% discount" },
+	{ name: "Flower Pots (10pcs)", slug: "flower-pots", discountLabel: "90% discount" },
+	{ name: "Ground Chakkars", slug: "ground-chakkars", discountLabel: "90% discount" },
+	{ name: "Sparklers", slug: "sparklers", discountLabel: "90% discount" },
+	{ name: "Pencil Sparkling Varieties", slug: "pencil-sparkling-varieties", discountLabel: "90% discount" },
+	{ name: "Sky Rockets", slug: "sky-rockets", discountLabel: "90% discount" },
+	{ name: "Bijili Crackers", slug: "bijili-crackers", discountLabel: "90% discount" },
+	{ name: "Bomb Crackers", slug: "bomb-crackers", discountLabel: "90% discount" },
+	{ name: "Paper Bomb", slug: "paper-bomb", discountLabel: "90% discount" },
+	{ name: "Wala Garland", slug: "wala-garland", discountLabel: "90% discount" },
+	{ name: "Sky Night Celebration", slug: "sky-night-celebration", discountLabel: "90% discount" },
+	{ name: "Night Fancy Celebration", slug: "night-fancy-celebration", discountLabel: "90% discount" },
+	{ name: "Fancy Flower Balls", slug: "fancy-flower-balls", discountLabel: "90% discount" },
+	{ name: "Color Matches", slug: "color-matches", discountLabel: "90% discount" },
+	{ name: "Children Gun Items", slug: "children-gun-items", discountLabel: "90% discount" },
+	{ name: "New Arrivals", slug: "new-arrivals", discountLabel: "90% discount" },
+	{ name: "New Arrivals 2026", slug: "new-arrivals-2026", discountLabel: "90% discount" },
+	{ name: "Gift Box (No Discount)", slug: "gift-box", discountLabel: null },
+	{ name: "Combo Pack", slug: "combo-pack", discountLabel: null },
 ] as const;
 
 async function seedCategories() {
 	const [existing] = await db.select().from(category).limit(1);
 	if (existing) {
-		console.log("✓ Categories already exist, skipping");
+		console.log("\u2713 Categories already exist, skipping");
 		return;
 	}
 
@@ -268,7 +271,7 @@ async function seedCategories() {
 			CATEGORY_SEED.map((c, index) => ({
 				name: c.name,
 				slug: c.slug,
-				discountLabel: "80% discount",
+				discountLabel: c.discountLabel,
 				sortOrder: index,
 				isActive: true,
 			})),
@@ -276,7 +279,7 @@ async function seedCategories() {
 		.onConflictDoNothing()
 		.returning();
 
-	console.log(`✓ Seeded ${inserted.length} categories`);
+	console.log(`\u2713 Seeded ${inserted.length} categories`);
 }
 
 // ── Products ───────────────────────────────────────────────────
@@ -290,21 +293,20 @@ interface RawProduct {
 }
 
 const PRODUCT_SEED: RawProduct[] = [
-	// ── ONE SOUND CRACKERS ────────────────────────────────
+
+	// ==== ONE SOUND CRACKERS ====
 	{
 		name: "3½ Lakshmi",
 		discountPrice: 13,
-		mrpPrice: 65,
+		mrpPrice: 130,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
-		imageUrl: img(
-			"3-quarterhalfthree-quarter3-Lakshmi-PKT.jpg-Lakshmi-PKT.jpg",
-		),
+		imageUrl: img("3-quarterhalfthree-quarter3-Lakshmi-PKT.jpg-Lakshmi-PKT.jpg"),
 	},
 	{
 		name: "4 Lakshmi",
 		discountPrice: 16,
-		mrpPrice: 80,
+		mrpPrice: 160,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("4-Lakshmi-PKT.jpg"),
@@ -312,7 +314,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "4 Lakshmi Deluxe",
 		discountPrice: 20,
-		mrpPrice: 100,
+		mrpPrice: 200,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("4-Lakshmi-Deluxe-PKT.jpg"),
@@ -320,7 +322,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Gold Lakshmi",
 		discountPrice: 32,
-		mrpPrice: 160,
+		mrpPrice: 320,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("Gold-Lakshmi-PKT.JPEG"),
@@ -328,15 +330,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Hulk Deluxe",
 		discountPrice: 34,
-		mrpPrice: 170,
+		mrpPrice: 340,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("4-Lakshmi-Deluxe-PKT.jpg"),
 	},
 	{
-		name: "Bagubali",
+		name: "Bagubali / Kundan",
 		discountPrice: 40,
-		mrpPrice: 200,
+		mrpPrice: 400,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("Bagubali-PKT.jpg"),
@@ -344,7 +346,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Jallikattu",
 		discountPrice: 45,
-		mrpPrice: 225,
+		mrpPrice: 450,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("Bagubali-PKT.jpg"),
@@ -352,7 +354,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Two Sound",
 		discountPrice: 32,
-		mrpPrice: 160,
+		mrpPrice: 320,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("Two-Sound-PKT.jpg"),
@@ -360,7 +362,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "2¾ Kuruvi",
 		discountPrice: 9,
-		mrpPrice: 45,
+		mrpPrice: 90,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("2-quarterhalfthree-quarter2-Kuruvi-PKT.jpg-Kuruvi-PKT.jpg"),
@@ -368,17 +370,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Elephant Deluxe",
 		discountPrice: 32,
-		mrpPrice: 160,
+		mrpPrice: 320,
 		unit: "BOX",
 		categorySlug: "one-sound-crackers",
 		imageUrl: img("Elephant-Deluxe-BOX.jpg"),
 	},
 
-	// ── FLOWER POTS ───────────────────────────────────────
+	// ==== FLOWER POTS ====
 	{
 		name: "Flowerpots Small",
 		discountPrice: 48,
-		mrpPrice: 240,
+		mrpPrice: 480,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Small-BOX.jpg"),
@@ -386,7 +388,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flowerpots Big",
 		discountPrice: 90,
-		mrpPrice: 450,
+		mrpPrice: 900,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Big-BOX.jpg"),
@@ -394,7 +396,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flowerpots Special",
 		discountPrice: 135,
-		mrpPrice: 675,
+		mrpPrice: 1350,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Special-BOX.jpg"),
@@ -402,7 +404,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flowerpots Ashoka",
 		discountPrice: 165,
-		mrpPrice: 825,
+		mrpPrice: 1650,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Ashoka-BOX.jpg"),
@@ -410,15 +412,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flowerpots Color Koti",
 		discountPrice: 240,
-		mrpPrice: 1200,
+		mrpPrice: 2400,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Color-Koti-BOX.jpg"),
 	},
 	{
-		name: "Flowerpots Multicolor Giant",
+		name: "Flowerpots Multicolor Matrix",
 		discountPrice: 325,
-		mrpPrice: 1625,
+		mrpPrice: 3250,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Multicolor-Giant-BOX.jpg"),
@@ -426,7 +428,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flowerpots Color Koti Deluxe",
 		discountPrice: 320,
-		mrpPrice: 1600,
+		mrpPrice: 3200,
 		unit: "10 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flowerpots-Color-Koti-Deluxe-BOX.jpg"),
@@ -434,7 +436,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Flower Pots Deluxe",
 		discountPrice: 160,
-		mrpPrice: 800,
+		mrpPrice: 1600,
 		unit: "5 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Flower-Pots-Deluxe-5Pcs-BOX.jpg"),
@@ -442,25 +444,33 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Tri Color",
 		discountPrice: 240,
-		mrpPrice: 1200,
+		mrpPrice: 2400,
 		unit: "5 pcs",
 		categorySlug: "flower-pots",
 		imageUrl: img("Tri-Color-5-Pcs-BOX.jpg"),
 	},
 	{
-		name: "Lucky Red and Green",
-		discountPrice: 30,
-		mrpPrice: 150,
-		unit: "5 pcs",
+		name: "5G Color Fountain",
+		discountPrice: 280,
+		mrpPrice: 2800,
+		unit: "BOX",
 		categorySlug: "flower-pots",
-		imageUrl: img("Lucky-Red-and-Green-5pcs-1-BOX.jpg"),
+		imageUrl: img("Tri-Color-5-Pcs-BOX.jpg"),
+	},
+	{
+		name: "Mega Colorkoti Deluxe",
+		discountPrice: 450,
+		mrpPrice: 4500,
+		unit: "10 pcs",
+		categorySlug: "flower-pots",
+		imageUrl: img("Flowerpots-Color-Koti-Deluxe-BOX.jpg"),
 	},
 
-	// ── GROUND CHAKKARS ───────────────────────────────────
+	// ==== GROUND CHAKKARS ====
 	{
 		name: "Chakker Small",
 		discountPrice: 35,
-		mrpPrice: 175,
+		mrpPrice: 350,
 		unit: "BOX",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Chakker-Small-BOX.jpg"),
@@ -468,7 +478,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Chakker Small",
 		discountPrice: 110,
-		mrpPrice: 550,
+		mrpPrice: 1100,
 		unit: "25 pcs",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Chakker-Small-BOX.jpg"),
@@ -476,7 +486,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Chakker Ashoka",
 		discountPrice: 75,
-		mrpPrice: 375,
+		mrpPrice: 750,
 		unit: "BOX",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("ChakkerAshoka-BOX.jpg"),
@@ -484,15 +494,31 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Chakker Special",
 		discountPrice: 120,
-		mrpPrice: 600,
+		mrpPrice: 1200,
 		unit: "BOX",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Chakker-Special-BOX.jpg"),
 	},
 	{
+		name: "Spinner Special",
+		discountPrice: 140,
+		mrpPrice: 1400,
+		unit: "BOX",
+		categorySlug: "ground-chakkars",
+		imageUrl: img("Bambara-Spinner-BOX.jpg"),
+	},
+	{
 		name: "Chakker Deluxe",
 		discountPrice: 150,
-		mrpPrice: 750,
+		mrpPrice: 1500,
+		unit: "BOX",
+		categorySlug: "ground-chakkars",
+		imageUrl: img("Chakker-Deluxe-BOX.jpg"),
+	},
+	{
+		name: "Twister Deluxe",
+		discountPrice: 180,
+		mrpPrice: 1800,
 		unit: "BOX",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Chakker-Deluxe-BOX.jpg"),
@@ -500,25 +526,33 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Disco Wheel",
 		discountPrice: 70,
-		mrpPrice: 350,
+		mrpPrice: 700,
 		unit: "5 pcs",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Disco-Wheel-5-Pcs-BOX.jpg"),
 	},
 	{
 		name: "Whistling Wheel",
-		discountPrice: 135,
-		mrpPrice: 675,
+		discountPrice: 140,
+		mrpPrice: 1400,
 		unit: "5 pcs",
 		categorySlug: "ground-chakkars",
 		imageUrl: img("Whistling-Wheel-5-Pcs-BOX.jpg"),
 	},
+	{
+		name: "Wire Chakkar",
+		discountPrice: 150,
+		mrpPrice: 1500,
+		unit: "BOX",
+		categorySlug: "ground-chakkars",
+		imageUrl: img("Chakker-Small-BOX.jpg"),
+	},
 
-	// ── SPARKLERS ─────────────────────────────────────────
+	// ==== SPARKLERS ====
 	{
 		name: "7cm Electric Sparklers",
 		discountPrice: 9,
-		mrpPrice: 45,
+		mrpPrice: 90,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("7-Cm-Electric-Sparklers-BOX.jpg"),
@@ -526,7 +560,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "7cm Color Sparklers",
 		discountPrice: 10,
-		mrpPrice: 50,
+		mrpPrice: 100,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("7-Cm-Color-Sparklers-BOX.jpg"),
@@ -534,7 +568,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "7cm Green Sparklers",
 		discountPrice: 12,
-		mrpPrice: 60,
+		mrpPrice: 120,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("7-Cm-Green-Sparklers-BOX.jpg"),
@@ -542,7 +576,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "7cm Red Sparklers",
 		discountPrice: 14,
-		mrpPrice: 70,
+		mrpPrice: 140,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("7-Cm-Red-Sparklers-BOX.jpg"),
@@ -550,7 +584,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10cm Electric Sparklers",
 		discountPrice: 21,
-		mrpPrice: 105,
+		mrpPrice: 210,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("10cm-Electric-Sparklers-BOX.jpg"),
@@ -558,7 +592,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10cm Color Sparklers",
 		discountPrice: 24,
-		mrpPrice: 120,
+		mrpPrice: 240,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("10cm-Color-Sparklers-BOX.jpg"),
@@ -566,7 +600,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10cm Green Sparklers",
 		discountPrice: 25,
-		mrpPrice: 125,
+		mrpPrice: 250,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("10cm-Green-Sparklers-BOX.jpg"),
@@ -574,7 +608,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10cm Red Sparklers",
 		discountPrice: 26,
-		mrpPrice: 130,
+		mrpPrice: 260,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("10cm-Red-Sparklers-BOX.jpg"),
@@ -582,7 +616,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12cm Electric Sparklers",
 		discountPrice: 34,
-		mrpPrice: 170,
+		mrpPrice: 340,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("12-Cm-Electric-Sparklers-BOX.jpg"),
@@ -590,7 +624,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12cm Color Sparklers",
 		discountPrice: 35,
-		mrpPrice: 175,
+		mrpPrice: 350,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("12-Cm-Color-Sparklers-BOX.jpg"),
@@ -598,7 +632,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12cm Green Sparklers",
 		discountPrice: 36,
-		mrpPrice: 180,
+		mrpPrice: 360,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("12-Cm-Green-Sparklers-BOX.jpg"),
@@ -606,7 +640,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12cm Red Sparklers",
 		discountPrice: 38,
-		mrpPrice: 190,
+		mrpPrice: 380,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("12-Cm-Red-Sparklers-BOX.jpg"),
@@ -614,7 +648,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "15cm Electric Sparklers",
 		discountPrice: 48,
-		mrpPrice: 240,
+		mrpPrice: 480,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("15-Cm-Electric-Sparklers-BOX.jpg"),
@@ -622,7 +656,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "15cm Color Sparklers",
 		discountPrice: 50,
-		mrpPrice: 250,
+		mrpPrice: 500,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("15-Cm-Color-Sparklers-BOX.jpg"),
@@ -630,7 +664,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "15cm Green Sparklers",
 		discountPrice: 52,
-		mrpPrice: 260,
+		mrpPrice: 520,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("15-Cm-Green-Sparklers-BOX.jpg"),
@@ -638,7 +672,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "15cm Red Sparklers",
 		discountPrice: 54,
-		mrpPrice: 270,
+		mrpPrice: 540,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("15-Cm-Red-Sparklers-BOX.jpg"),
@@ -646,7 +680,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30cm Electric Sparklers",
 		discountPrice: 48,
-		mrpPrice: 240,
+		mrpPrice: 480,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("30-Cm-Electric-Sparklers-BOX.jpg"),
@@ -654,7 +688,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30cm Color Sparklers",
 		discountPrice: 50,
-		mrpPrice: 250,
+		mrpPrice: 500,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("30-Cm-Color-Sparklers-BOX.jpg"),
@@ -662,7 +696,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30cm Green Sparklers",
 		discountPrice: 52,
-		mrpPrice: 260,
+		mrpPrice: 520,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("30-Cm-Green-Sparklers-BOX.jpg"),
@@ -670,7 +704,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30cm Red Sparklers",
 		discountPrice: 54,
-		mrpPrice: 270,
+		mrpPrice: 540,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("30-Cm-Red-Sparklers-BOX.jpg"),
@@ -678,7 +712,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "50cm Electric Sparklers",
 		discountPrice: 150,
-		mrpPrice: 750,
+		mrpPrice: 1500,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("50-Cm-Electric-Sparklers-BOX.jpg"),
@@ -686,67 +720,65 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "50cm Color Sparklers",
 		discountPrice: 160,
-		mrpPrice: 800,
+		mrpPrice: 1600,
 		unit: "BOX",
 		categorySlug: "sparklers",
 		imageUrl: img("50-Cm-Color-Sparklers-BOX.jpg"),
 	},
 
-	// ── PENCIL SPARKLING VARIETIES ────────────────────────
+	// ==== PENCIL SPARKLING VARIETIES ====
 	{
 		name: "1½ Twinkling Star",
 		discountPrice: 24,
-		mrpPrice: 120,
+		mrpPrice: 240,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
-		imageUrl: img(
-			"1-quarterhalfthree-quarter1-Twinkling-star-BOX.jpg-Twinkling-star-BOX.jpg",
-		),
+		imageUrl: img("1-quarterhalfthree-quarter1-Twinkling-star-BOX.jpg-Twinkling-star-BOX.jpg"),
 	},
 	{
 		name: "4 Twinkling Star",
 		discountPrice: 60,
-		mrpPrice: 300,
+		mrpPrice: 600,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("4-Twinkling-Star-BOX.jpg"),
 	},
 	{
-		name: '7" Pencil',
+		name: "7\" Pencil",
 		discountPrice: 30,
-		mrpPrice: 150,
+		mrpPrice: 300,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("7-Pencil-BOX.jpg"),
 	},
 	{
-		name: '10" Pencil',
+		name: "10\" Pencil",
 		discountPrice: 60,
-		mrpPrice: 300,
+		mrpPrice: 600,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("10-pencil-box.jpg"),
 	},
 	{
 		name: "Ultra-Color Pencil",
-		discountPrice: 70,
-		mrpPrice: 350,
+		discountPrice: 80,
+		mrpPrice: 800,
 		unit: "3 pcs",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("Ultra-Color-Pencil-3-Pcs-BOX.jpg"),
 	},
 	{
 		name: "Sivakasi Special",
-		discountPrice: 210,
-		mrpPrice: 1050,
+		discountPrice: 240,
+		mrpPrice: 2400,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("SivakasiSpecail-BOX.jpg"),
 	},
 	{
 		name: "Pop Corn Pencil",
-		discountPrice: 180,
-		mrpPrice: 900,
+		discountPrice: 220,
+		mrpPrice: 2200,
 		unit: "5 pcs",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("Ultra-Color-Pencil-3-Pcs-BOX.jpg"),
@@ -754,17 +786,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Cartoon Pots",
 		discountPrice: 20,
-		mrpPrice: 100,
+		mrpPrice: 200,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
 		imageUrl: img("10-pencil-box.jpg"),
 	},
 
-	// ── SKY ROCKETS ───────────────────────────────────────
+	// ==== SKY ROCKETS ====
 	{
 		name: "Baby Rocket",
 		discountPrice: 35,
-		mrpPrice: 175,
+		mrpPrice: 350,
 		unit: "BOX",
 		categorySlug: "sky-rockets",
 		imageUrl: img("Baby-Rocket-BOX.jpg"),
@@ -772,7 +804,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Rocket Bomb",
 		discountPrice: 80,
-		mrpPrice: 400,
+		mrpPrice: 800,
 		unit: "BOX",
 		categorySlug: "sky-rockets",
 		imageUrl: img("Rocket-Bomb-BOX.jpg"),
@@ -780,7 +812,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Lunic Rocket",
 		discountPrice: 120,
-		mrpPrice: 600,
+		mrpPrice: 1200,
 		unit: "BOX",
 		categorySlug: "sky-rockets",
 		imageUrl: img("Lunic-Rocket-BOX.jpg"),
@@ -788,7 +820,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Two Sound Rocket",
 		discountPrice: 130,
-		mrpPrice: 650,
+		mrpPrice: 1300,
 		unit: "BOX",
 		categorySlug: "sky-rockets",
 		imageUrl: img("Two-Sound-Rocket-BOX.jpg"),
@@ -796,17 +828,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Echo Music Rocket",
 		discountPrice: 145,
-		mrpPrice: 725,
+		mrpPrice: 1450,
 		unit: "BOX",
 		categorySlug: "sky-rockets",
 		imageUrl: img("Two-Sound-Rocket-BOX.jpg"),
 	},
 
-	// ── BIJILI CRACKERS ───────────────────────────────────
+	// ==== BIJILI CRACKERS ====
 	{
 		name: "Red Bijili",
 		discountPrice: 15,
-		mrpPrice: 75,
+		mrpPrice: 150,
 		unit: "50 pcs",
 		categorySlug: "bijili-crackers",
 		imageUrl: img("Red-Bijili-50-Pcs-BOX.jpg"),
@@ -814,33 +846,25 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Red Bijili",
 		discountPrice: 35,
-		mrpPrice: 175,
+		mrpPrice: 350,
 		unit: "100 pcs",
 		categorySlug: "bijili-crackers",
 		imageUrl: img("Red-Bijili-100-Pcs-BOX.jpg"),
 	},
 
-	// ── BOMB CRACKERS ─────────────────────────────────────
+	// ==== BOMB CRACKERS ====
 	{
 		name: "Bullet Bomb",
 		discountPrice: 22,
-		mrpPrice: 110,
+		mrpPrice: 220,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Bullet-Bomb-BOX.jpg"),
 	},
 	{
-		name: "Atom Bomb",
-		discountPrice: 45,
-		mrpPrice: 225,
-		unit: "BOX",
-		categorySlug: "bomb-crackers",
-		imageUrl: img("Atom-Bomb-BOX.jpg"),
-	},
-	{
 		name: "Hydro Bomb",
 		discountPrice: 65,
-		mrpPrice: 325,
+		mrpPrice: 650,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Hydro-Bomb-BOX.jpg"),
@@ -848,7 +872,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "King Of King",
 		discountPrice: 85,
-		mrpPrice: 425,
+		mrpPrice: 850,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("King-Of-King-BOX.jpg"),
@@ -856,41 +880,41 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Classic Bomb",
 		discountPrice: 110,
-		mrpPrice: 550,
+		mrpPrice: 1100,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Classic-Bomb-BOX.jpg"),
 	},
 	{
 		name: "Dinosaur Bomb",
-		discountPrice: 198,
-		mrpPrice: 990,
+		discountPrice: 210,
+		mrpPrice: 2100,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Dinosaur-Bomb-BOX.jpg"),
 	},
 	{
 		name: "Agni Bomb",
-		discountPrice: 190,
-		mrpPrice: 950,
+		discountPrice: 220,
+		mrpPrice: 2200,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Agni-Bomb-BOX.jpg"),
 	},
 	{
 		name: "Digital Deluxe Bomb",
-		discountPrice: 220,
-		mrpPrice: 1100,
+		discountPrice: 240,
+		mrpPrice: 2400,
 		unit: "BOX",
 		categorySlug: "bomb-crackers",
 		imageUrl: img("Digital-Deluxe-Bomb-BOX.jpg"),
 	},
 
-	// ── PAPER BOMB ────────────────────────────────────────
+	// ==== PAPER BOMB ====
 	{
 		name: "Adiyal ¼ Kg",
 		discountPrice: 60,
-		mrpPrice: 300,
+		mrpPrice: 600,
 		unit: "¼ kg",
 		categorySlug: "paper-bomb",
 		imageUrl: img("adiyal-kg-box.jpg"),
@@ -898,17 +922,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Adiyal ½ Kg",
 		discountPrice: 120,
-		mrpPrice: 600,
+		mrpPrice: 1200,
 		unit: "½ kg",
 		categorySlug: "paper-bomb",
-		imageUrl: img(
-			"Adiyal-quarterhalfthree-quarterAdiyal-Kg-BOX.jpg-Kg-BOX.jpg",
-		),
+		imageUrl: img("Adiyal-quarterhalfthree-quarterAdiyal-Kg-BOX.jpg-Kg-BOX.jpg"),
 	},
 	{
 		name: "Color Paper Vedi",
 		discountPrice: 90,
-		mrpPrice: 450,
+		mrpPrice: 900,
 		unit: "5 pcs",
 		categorySlug: "paper-bomb",
 		imageUrl: img("adiyal-kg-box.jpg"),
@@ -916,7 +938,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Avatar Bomb",
 		discountPrice: 250,
-		mrpPrice: 1250,
+		mrpPrice: 2500,
 		unit: "10 pcs",
 		categorySlug: "paper-bomb",
 		imageUrl: img("Avatar-Bomb-10-Pcs-BOX.jpg"),
@@ -924,17 +946,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Crorepathy Bomb",
 		discountPrice: 294,
-		mrpPrice: 1470,
+		mrpPrice: 2940,
 		unit: "BOX",
 		categorySlug: "paper-bomb",
 		imageUrl: img("Avatar-Bomb-10-Pcs-BOX.jpg"),
 	},
 
-	// ── WALA GARLAND ──────────────────────────────────────
+	// ==== WALA GARLAND ====
 	{
 		name: "24 Deluxe",
 		discountPrice: 45,
-		mrpPrice: 225,
+		mrpPrice: 450,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("24-Deluxe-PKT.jpg"),
@@ -942,7 +964,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "50 Deluxe",
 		discountPrice: 105,
-		mrpPrice: 525,
+		mrpPrice: 1050,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("50-Deluxe-PKT.jpg"),
@@ -950,7 +972,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "100 Deluxe",
 		discountPrice: 210,
-		mrpPrice: 1050,
+		mrpPrice: 2100,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("100-Deluxe-PKT.jpg"),
@@ -958,7 +980,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "28 Chorsa",
 		discountPrice: 15,
-		mrpPrice: 75,
+		mrpPrice: 150,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("28-Chorsa-PKT.jpg"),
@@ -966,7 +988,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "28 Giant",
 		discountPrice: 30,
-		mrpPrice: 150,
+		mrpPrice: 300,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("56-Giant-PKT.jpg"),
@@ -974,7 +996,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "56 Giant",
 		discountPrice: 45,
-		mrpPrice: 225,
+		mrpPrice: 450,
 		unit: "PKT",
 		categorySlug: "wala-garland",
 		imageUrl: img("56-Giant-PKT.jpg"),
@@ -982,7 +1004,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "100 Wala",
 		discountPrice: 40,
-		mrpPrice: 200,
+		mrpPrice: 400,
 		unit: "100",
 		categorySlug: "wala-garland",
 		imageUrl: img("100-Wala-BOX.jpg"),
@@ -990,31 +1012,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "200 Wala",
 		discountPrice: 80,
-		mrpPrice: 400,
+		mrpPrice: 800,
 		unit: "200",
 		categorySlug: "wala-garland",
 		imageUrl: img("200-Wala-BOX.jpg"),
 	},
 	{
-		name: "300 Wala",
-		discountPrice: 105,
-		mrpPrice: 525,
-		unit: "300",
-		categorySlug: "wala-garland",
-		imageUrl: img("300-Wala-BOX.jpg"),
-	},
-	{
-		name: "600 Wala",
-		discountPrice: 135,
-		mrpPrice: 675,
-		unit: "600",
-		categorySlug: "wala-garland",
-		imageUrl: img("600-Wala-BOX.jpg"),
-	},
-	{
 		name: "1000 Wala",
 		discountPrice: 150,
-		mrpPrice: 750,
+		mrpPrice: 1500,
 		unit: "1000",
 		categorySlug: "wala-garland",
 		imageUrl: img("1000-Wala-BOX.jpg"),
@@ -1022,7 +1028,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "1000 Wala Power",
 		discountPrice: 250,
-		mrpPrice: 1250,
+		mrpPrice: 2500,
 		unit: "1000",
 		categorySlug: "wala-garland",
 		imageUrl: img("1000-Wala-Power-BOX.jpg"),
@@ -1030,7 +1036,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "2000 Wala",
 		discountPrice: 520,
-		mrpPrice: 2600,
+		mrpPrice: 5200,
 		unit: "2000",
 		categorySlug: "wala-garland",
 		imageUrl: img("2000-Wala-BOX.jpg"),
@@ -1038,7 +1044,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "5000 Wala",
 		discountPrice: 950,
-		mrpPrice: 4750,
+		mrpPrice: 9500,
 		unit: "5000",
 		categorySlug: "wala-garland",
 		imageUrl: img("5000-Wala-BOX.jpg"),
@@ -1046,7 +1052,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "5000 Wala Power",
 		discountPrice: 1450,
-		mrpPrice: 7250,
+		mrpPrice: 14500,
 		unit: "5000",
 		categorySlug: "wala-garland",
 		imageUrl: img("5000-Wala-Power-BOX.jpg"),
@@ -1054,7 +1060,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10000 Wala",
 		discountPrice: 1800,
-		mrpPrice: 9000,
+		mrpPrice: 18000,
 		unit: "10000",
 		categorySlug: "wala-garland",
 		imageUrl: img("10000-BOX.jpg"),
@@ -1062,17 +1068,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "10000 Wala Power",
 		discountPrice: 2400,
-		mrpPrice: 12000,
+		mrpPrice: 24000,
 		unit: "10000",
 		categorySlug: "wala-garland",
 		imageUrl: img("10000-Wala-Power-BOX.jpg"),
 	},
 
-	// ── SKY NIGHT CELEBRATION ─────────────────────────────
+	// ==== SKY NIGHT CELEBRATION ====
 	{
 		name: "Chota Pipe Multi Color",
 		discountPrice: 45,
-		mrpPrice: 225,
+		mrpPrice: 450,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("120-Shot-Multi-Color-BOX.jpg"),
@@ -1080,49 +1086,47 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "7 Shot",
 		discountPrice: 110,
-		mrpPrice: 550,
-		unit: "BOX",
+		mrpPrice: 1100,
+		unit: "5 pcs",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("7-Shot-BOX.jpg"),
 	},
 	{
 		name: "Sky King Multi Color",
 		discountPrice: 135,
-		mrpPrice: 675,
-		unit: "BOX",
+		mrpPrice: 1350,
+		unit: "5 pcs",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("Sky-King-Multi-Color-BOX.jpg"),
 	},
 	{
 		name: "Penta Park Multi Color",
 		discountPrice: 170,
-		mrpPrice: 850,
-		unit: "BOX",
+		mrpPrice: 1700,
+		unit: "5 pcs",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("Penta-Park-Multi-Color-BOX.jpg"),
 	},
 	{
 		name: "2½ Fancy Pipe",
 		discountPrice: 250,
-		mrpPrice: 1250,
+		mrpPrice: 2500,
 		unit: "3 pcs",
 		categorySlug: "sky-night-celebration",
-		imageUrl: img(
-			"2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg",
-		),
+		imageUrl: img("2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg"),
 	},
 	{
 		name: "2½ Fancy",
 		discountPrice: 120,
-		mrpPrice: 600,
+		mrpPrice: 1200,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("2-quarterhalfthree-quarter2-Fancy-BOX.jpg-Fancy-BOX.jpg"),
 	},
 	{
 		name: "3½ Fancy",
-		discountPrice: 220,
-		mrpPrice: 1100,
+		discountPrice: 260,
+		mrpPrice: 2600,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("4-Fancy-BOX.jpg"),
@@ -1130,33 +1134,39 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "3½ Fancy Double Ball",
 		discountPrice: 370,
-		mrpPrice: 1850,
+		mrpPrice: 3700,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("4-Fancy-BOX.jpg"),
 	},
 	{
 		name: "3½ Fancy Pipe",
-		discountPrice: 550,
-		mrpPrice: 2750,
+		discountPrice: 600,
+		mrpPrice: 6000,
 		unit: "2 pcs",
 		categorySlug: "sky-night-celebration",
-		imageUrl: img(
-			"2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg",
-		),
+		imageUrl: img("2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg"),
 	},
 	{
-		name: '4" Fancy',
-		discountPrice: 280,
-		mrpPrice: 1400,
+		name: "4\" Fancy",
+		discountPrice: 320,
+		mrpPrice: 3200,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("4-Fancy-BOX.jpg"),
 	},
 	{
-		name: '4" Fancy',
-		discountPrice: 650,
-		mrpPrice: 3250,
+		name: "4\" Fancy",
+		discountPrice: 700,
+		mrpPrice: 7000,
+		unit: "2 pcs",
+		categorySlug: "sky-night-celebration",
+		imageUrl: img("4-Fancy-BOX.jpg"),
+	},
+	{
+		name: "5\" Mega Pipe",
+		discountPrice: 820,
+		mrpPrice: 8200,
 		unit: "2 pcs",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("4-Fancy-BOX.jpg"),
@@ -1164,7 +1174,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12 Step",
 		discountPrice: 330,
-		mrpPrice: 1650,
+		mrpPrice: 3300,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("12-Step-BOX.jpg"),
@@ -1172,7 +1182,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "12 Shot",
 		discountPrice: 180,
-		mrpPrice: 900,
+		mrpPrice: 1800,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("12-Shot-BOX.jpg"),
@@ -1180,7 +1190,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30 Peacock Shot",
 		discountPrice: 350,
-		mrpPrice: 1750,
+		mrpPrice: 3500,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("30-Peacock-Shot-BOX.jpg"),
@@ -1188,7 +1198,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30 Shot Multi Color",
 		discountPrice: 380,
-		mrpPrice: 1900,
+		mrpPrice: 3800,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("30-Shot-Multi-Color-BOX.jpg"),
@@ -1196,7 +1206,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "60 Shot Multi Color",
 		discountPrice: 750,
-		mrpPrice: 3750,
+		mrpPrice: 7500,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("60-Shot-Multi-Color-BOX.jpg"),
@@ -1204,65 +1214,73 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "120 Shot Multi Color",
 		discountPrice: 1450,
-		mrpPrice: 7250,
+		mrpPrice: 14500,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("120-Shot-Multi-Color-BOX.jpg"),
 	},
 	{
 		name: "240 Shot Multi Color",
-		discountPrice: 2600,
-		mrpPrice: 13000,
+		discountPrice: 2800,
+		mrpPrice: 28000,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("240-Shot-Multi-Color-BOX.jpg"),
 	},
 	{
-		name: "10x10 Sizeling Shot",
-		discountPrice: 2700,
-		mrpPrice: 13500,
+		name: "5x10 Dragan Mines Shot",
+		discountPrice: 2600,
+		mrpPrice: 26000,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("10x10-Sizeling-Shot-BOX.jpg"),
 	},
 	{
-		name: "10x10 Tail Light",
+		name: "IPL 10x10 Sizzling Shot",
+		discountPrice: 2700,
+		mrpPrice: 27000,
+		unit: "BOX",
+		categorySlug: "sky-night-celebration",
+		imageUrl: img("10x10-Sizeling-Shot-BOX.jpg"),
+	},
+	{
+		name: "IPL 10x10 Tail Light",
 		discountPrice: 3200,
-		mrpPrice: 16000,
+		mrpPrice: 32000,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("10X10-Tail-Light-BOX.jpg"),
 	},
 	{
-		name: '20x2.5" Thriller Set Grand',
+		name: "20x2.5\" Thriller Set Grand",
 		discountPrice: 3200,
-		mrpPrice: 16000,
+		mrpPrice: 32000,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("20-x-2.5Thriller-Set-Grand-BOX.jpg"),
 	},
 	{
-		name: '32x3.5" Mega Thriller Set',
+		name: "32x3.5\" Mega Thriller Set Grand",
 		discountPrice: 4750,
-		mrpPrice: 23750,
+		mrpPrice: 47500,
 		unit: "BOX",
 		categorySlug: "sky-night-celebration",
 		imageUrl: img("32-x-3.5Mega-Thriller-Set-Grand-BOX.jpg"),
 	},
 
-	// ── NIGHT FANCY CELEBRATION ───────────────────────────
+	// ==== NIGHT FANCY CELEBRATION ====
 	{
 		name: "Asrafi",
 		discountPrice: 45,
-		mrpPrice: 225,
-		unit: "BOX",
+		mrpPrice: 450,
+		unit: "5 pcs",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Asrafi-BOX.jpg"),
 	},
 	{
-		name: '4" Angry Bird',
+		name: "4\" Angry Bird",
 		discountPrice: 60,
-		mrpPrice: 300,
+		mrpPrice: 600,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("4-Fancy-BOX.jpg"),
@@ -1270,31 +1288,31 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Ganga Jamuna",
 		discountPrice: 75,
-		mrpPrice: 375,
-		unit: "BOX",
+		mrpPrice: 750,
+		unit: "5 pcs",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Ganga-Jamuna-BOX.jpg"),
 	},
 	{
 		name: "Photo Flash",
 		discountPrice: 65,
-		mrpPrice: 325,
-		unit: "BOX",
+		mrpPrice: 650,
+		unit: "5 pcs",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Asrafi-BOX.jpg"),
 	},
 	{
 		name: "Star Light",
-		discountPrice: 70,
-		mrpPrice: 350,
-		unit: "BOX",
+		discountPrice: 90,
+		mrpPrice: 900,
+		unit: "5 pcs",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("King-Star-BOX.jpg"),
 	},
 	{
 		name: "Dancing Butterfly",
 		discountPrice: 75,
-		mrpPrice: 375,
+		mrpPrice: 750,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Dancing-Butterfly-BOX.jpg"),
@@ -1302,7 +1320,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Feather Pop Shower",
 		discountPrice: 130,
-		mrpPrice: 650,
+		mrpPrice: 1300,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
@@ -1310,15 +1328,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Color Rain",
 		discountPrice: 125,
-		mrpPrice: 625,
+		mrpPrice: 1250,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
-		name: '2" Sun Feast Multicolor',
+		name: "2\" Sun Feast Multicolor",
 		discountPrice: 140,
-		mrpPrice: 700,
+		mrpPrice: 1400,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("2-Sun-feast-Multicolor-BOX.jpg"),
@@ -1326,7 +1344,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Golden Rise",
 		discountPrice: 125,
-		mrpPrice: 625,
+		mrpPrice: 1250,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Mega-Siren-BOX.jpg"),
@@ -1334,7 +1352,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Mini Siren",
 		discountPrice: 135,
-		mrpPrice: 675,
+		mrpPrice: 1350,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Mini-Siren-BOX.jpg"),
@@ -1342,7 +1360,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Mega Siren",
 		discountPrice: 165,
-		mrpPrice: 825,
+		mrpPrice: 1650,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Mega-Siren-BOX.jpg"),
@@ -1350,7 +1368,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Peacock Fancy",
 		discountPrice: 165,
-		mrpPrice: 825,
+		mrpPrice: 1650,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Peacock-Fancy-BOX.jpg"),
@@ -1358,7 +1376,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Bada Peacock",
 		discountPrice: 375,
-		mrpPrice: 1875,
+		mrpPrice: 3750,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Bada-Peacock-BOX.jpg"),
@@ -1366,15 +1384,23 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Silky Shower",
 		discountPrice: 110,
-		mrpPrice: 550,
+		mrpPrice: 1100,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
+		name: "2\" Red And Green Shower",
+		discountPrice: 135,
+		mrpPrice: 1350,
+		unit: "BOX",
+		categorySlug: "night-fancy-celebration",
+		imageUrl: img("Lucky-Red-and-Green-5pcs-1-BOX.jpg"),
+	},
+	{
 		name: "Tin Beer Shower",
 		discountPrice: 120,
-		mrpPrice: 600,
+		mrpPrice: 1200,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
@@ -1382,7 +1408,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Star Shown Popcorn",
 		discountPrice: 170,
-		mrpPrice: 850,
+		mrpPrice: 1700,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("King-Star-BOX.jpg"),
@@ -1390,15 +1416,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Apple Shower",
 		discountPrice: 180,
-		mrpPrice: 900,
+		mrpPrice: 1800,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
-		name: '3" Red Sun Shower',
+		name: "3\" Red Sun Shower",
 		discountPrice: 210,
-		mrpPrice: 1050,
+		mrpPrice: 2100,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("3-Red-Sun-Shower-BOX.jpg"),
@@ -1406,7 +1432,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Smoke Fountain Celebration",
 		discountPrice: 220,
-		mrpPrice: 1100,
+		mrpPrice: 2200,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Mega-Siren-BOX.jpg"),
@@ -1414,15 +1440,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Bambara Spinner",
 		discountPrice: 135,
-		mrpPrice: 675,
+		mrpPrice: 1350,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Bambara-Spinner-BOX.jpg"),
 	},
 	{
-		name: "Tim Tom",
+		name: "Bim Bom",
 		discountPrice: 85,
-		mrpPrice: 425,
+		mrpPrice: 850,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Kit-Kat-BOX.jpg"),
@@ -1430,7 +1456,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Kit Kat",
 		discountPrice: 30,
-		mrpPrice: 150,
+		mrpPrice: 300,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Kit-Kat-BOX.jpg"),
@@ -1438,7 +1464,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Zee Boom Baa",
 		discountPrice: 15,
-		mrpPrice: 75,
+		mrpPrice: 150,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Zee-Boom-Baa-BOX.jpg"),
@@ -1446,17 +1472,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Electric Stone",
 		discountPrice: 15,
-		mrpPrice: 75,
+		mrpPrice: 150,
 		unit: "BOX",
 		categorySlug: "night-fancy-celebration",
 		imageUrl: img("Electric-Stone-BOX.jpg"),
 	},
 
-	// ── FANCY FLOWER BALLS ────────────────────────────────
+	// ==== FANCY FLOWER BALLS ====
 	{
 		name: "Chun Mun Barrels",
 		discountPrice: 195,
-		mrpPrice: 975,
+		mrpPrice: 1950,
 		unit: "BOX",
 		categorySlug: "fancy-flower-balls",
 		imageUrl: img("Chun-Mun-Barrels-BOX.jpg"),
@@ -1464,7 +1490,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Two in One",
 		discountPrice: 450,
-		mrpPrice: 2250,
+		mrpPrice: 4500,
 		unit: "BOX",
 		categorySlug: "fancy-flower-balls",
 		imageUrl: img("Chun-Mun-Barrels-BOX.jpg"),
@@ -1472,17 +1498,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Mega Deluxe",
 		discountPrice: 550,
-		mrpPrice: 2750,
+		mrpPrice: 5500,
 		unit: "BOX",
 		categorySlug: "fancy-flower-balls",
 		imageUrl: img("Mega-Deluxe-BOX.jpg"),
 	},
 
-	// ── COLOR MATCHES ─────────────────────────────────────
+	// ==== COLOR MATCHES ====
 	{
-		name: "Royal Deluxe Matches",
+		name: "Royal 5 in 1 Matches",
 		discountPrice: 80,
-		mrpPrice: 400,
+		mrpPrice: 800,
 		unit: "BOX",
 		categorySlug: "color-matches",
 		imageUrl: img("Royal-Deluxe-Matches-BOX.jpg"),
@@ -1490,7 +1516,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Royal Lamba Matches",
 		discountPrice: 160,
-		mrpPrice: 800,
+		mrpPrice: 1600,
 		unit: "BOX",
 		categorySlug: "color-matches",
 		imageUrl: img("Royal-Lamba-Matches-BOX.jpg"),
@@ -1498,17 +1524,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Mega Laptop Matches",
 		discountPrice: 250,
-		mrpPrice: 1250,
+		mrpPrice: 2500,
 		unit: "BOX",
 		categorySlug: "color-matches",
 		imageUrl: img("Mega-Laptop-Matches-BOX.jpg"),
 	},
 
-	// ── CHILDREN GUN ITEMS ────────────────────────────────
+	// ==== CHILDREN GUN ITEMS ====
 	{
 		name: "Roll Cap",
 		discountPrice: 80,
-		mrpPrice: 400,
+		mrpPrice: 800,
 		unit: "BOX",
 		categorySlug: "children-gun-items",
 		imageUrl: img("Roll-Cap-BOX.jpg"),
@@ -1516,7 +1542,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Snake Tablet",
 		discountPrice: 35,
-		mrpPrice: 175,
+		mrpPrice: 350,
 		unit: "BOX",
 		categorySlug: "children-gun-items",
 		imageUrl: img("Snake-Tablet-BOX.jpg"),
@@ -1524,7 +1550,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Small Size Gun",
 		discountPrice: 50,
-		mrpPrice: 250,
+		mrpPrice: 500,
 		unit: "BOX",
 		categorySlug: "children-gun-items",
 		imageUrl: img("Roll-Cap-BOX.jpg"),
@@ -1532,17 +1558,17 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Mega Gun",
 		discountPrice: 100,
-		mrpPrice: 500,
+		mrpPrice: 1000,
 		unit: "BOX",
 		categorySlug: "children-gun-items",
 		imageUrl: img("Roll-Cap-BOX.jpg"),
 	},
 
-	// ── NEW ARRIVALS ──────────────────────────────────────
+	// ==== NEW ARRIVALS ====
 	{
-		name: "King Star",
+		name: "King Star Crackling",
 		discountPrice: 295,
-		mrpPrice: 1475,
+		mrpPrice: 2950,
 		unit: "BOX",
 		categorySlug: "new-arrivals",
 		imageUrl: img("King-Star-BOX.jpg"),
@@ -1550,7 +1576,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Old is Gold",
 		discountPrice: 190,
-		mrpPrice: 950,
+		mrpPrice: 1900,
 		unit: "PKT",
 		categorySlug: "new-arrivals",
 		imageUrl: img("Old-is-Gold-PKT.jpg"),
@@ -1558,7 +1584,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Star Wheel",
 		discountPrice: 175,
-		mrpPrice: 875,
+		mrpPrice: 1750,
 		unit: "PKT",
 		categorySlug: "new-arrivals",
 		imageUrl: img("Whistling-Wheel-5-Pcs-BOX.jpg"),
@@ -1566,7 +1592,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Water Queen Falls",
 		discountPrice: 190,
-		mrpPrice: 950,
+		mrpPrice: 1900,
 		unit: "PKT",
 		categorySlug: "new-arrivals",
 		imageUrl: img("Water-Queen-Falls-PKT.jpg"),
@@ -1574,15 +1600,15 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Top Gun Fancy",
 		discountPrice: 210,
-		mrpPrice: 1050,
+		mrpPrice: 2100,
 		unit: "PKT",
 		categorySlug: "new-arrivals",
 		imageUrl: img("Roll-Cap-BOX.jpg"),
 	},
 	{
 		name: "Moon Light",
-		discountPrice: 70,
-		mrpPrice: 350,
+		discountPrice: 90,
+		mrpPrice: 900,
 		unit: "BOX",
 		categorySlug: "new-arrivals",
 		imageUrl: img("King-Star-BOX.jpg"),
@@ -1590,33 +1616,49 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Helicopter",
 		discountPrice: 130,
-		mrpPrice: 650,
+		mrpPrice: 1300,
 		unit: "BOX",
 		categorySlug: "new-arrivals",
 		imageUrl: img("Lunic-Rocket-BOX.jpg"),
 	},
 
-	// ── NEW ARRIVALS 2026 ─────────────────────────────────
+	// ==== NEW ARRIVALS 2026 ====
 	{
 		name: "Fun Zone Crackling",
 		discountPrice: 370,
-		mrpPrice: 1850,
+		mrpPrice: 3700,
 		unit: "5 pcs",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("Fun-Zone-Crackling-5Pcs-BOX.jpg"),
 	},
 	{
-		name: "Rotating Sparklers",
-		discountPrice: 150,
-		mrpPrice: 750,
+		name: "Emu Egg",
+		discountPrice: 120,
+		mrpPrice: 1200,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("Rotating-Sparklers-BOX.jpg"),
 	},
 	{
-		name: "Magic Whip",
+		name: "LoliPop Shower",
+		discountPrice: 205,
+		mrpPrice: 2050,
+		unit: "2 pcs",
+		categorySlug: "new-arrivals-2026",
+		imageUrl: img("Magic-whip-BOX.jpg"),
+	},
+	{
+		name: "Rotating Sparkling",
+		discountPrice: 150,
+		mrpPrice: 1500,
+		unit: "BOX",
+		categorySlug: "new-arrivals-2026",
+		imageUrl: img("Rotating-Sparklers-BOX.jpg"),
+	},
+	{
+		name: "90\" Watts",
 		discountPrice: 145,
-		mrpPrice: 725,
+		mrpPrice: 1450,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("Magic-whip-BOX.jpg"),
@@ -1624,31 +1666,23 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "Star World",
 		discountPrice: 160,
-		mrpPrice: 800,
+		mrpPrice: 1600,
 		unit: "5 pcs",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("Whistling-Wheel-5-Pcs-BOX.jpg"),
 	},
 	{
-		name: '4" Pipe Golden Eye',
-		discountPrice: 370,
-		mrpPrice: 1850,
-		unit: "BOX",
-		categorySlug: "new-arrivals-2026",
-		imageUrl: img("4-Pipe-Golden-Eye-BOX.jpg"),
-	},
-	{
-		name: '4" Pipe Wow Purple',
-		discountPrice: 370,
-		mrpPrice: 1850,
+		name: "4\" Pipe Wow Purple",
+		discountPrice: 420,
+		mrpPrice: 4200,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("4-Pipe-Wow-Purple-BOX.jpg"),
 	},
 	{
-		name: '4" Pipe Wow Orange',
-		discountPrice: 370,
-		mrpPrice: 1850,
+		name: "4\" Pipe Wow Orange",
+		discountPrice: 420,
+		mrpPrice: 4200,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("4-Pipe-Wow-Purple-BOX.jpg"),
@@ -1656,7 +1690,7 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30 Flash Color Shot",
 		discountPrice: 420,
-		mrpPrice: 2100,
+		mrpPrice: 4200,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("30-Shot-Multi-Color-BOX.jpg"),
@@ -1664,23 +1698,65 @@ const PRODUCT_SEED: RawProduct[] = [
 	{
 		name: "30 Crack Jack Color Shot",
 		discountPrice: 480,
-		mrpPrice: 2400,
+		mrpPrice: 4800,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("30-Shot-Multi-Color-BOX.jpg"),
 	},
 	{
-		name: "Blast Gun Pistol 5G",
-		discountPrice: 210,
-		mrpPrice: 1050,
+		name: "Blast Gun Or Pistol 5G",
+		discountPrice: 240,
+		mrpPrice: 2400,
 		unit: "BOX",
 		categorySlug: "new-arrivals-2026",
 		imageUrl: img("Roll-Cap-BOX.jpg"),
 	},
 
-	// ── COMBO PACK ────────────────────────────────────────
+	// ==== GIFT BOX (NO DISCOUNT) ====
 	{
-		name: "3000 Combo Pack",
+		name: "25 Items Gift Box",
+		discountPrice: 450,
+		mrpPrice: 450,
+		unit: "BOX",
+		categorySlug: "gift-box",
+		imageUrl: img("Mega-Deluxe-BOX.jpg"),
+	},
+	{
+		name: "30 Items Gift Box",
+		discountPrice: 550,
+		mrpPrice: 550,
+		unit: "BOX",
+		categorySlug: "gift-box",
+		imageUrl: img("Mega-Deluxe-BOX.jpg"),
+	},
+	{
+		name: "35 Items Gift Box",
+		discountPrice: 650,
+		mrpPrice: 650,
+		unit: "BOX",
+		categorySlug: "gift-box",
+		imageUrl: img("Mega-Deluxe-BOX.jpg"),
+	},
+	{
+		name: "40 Items Gift Box",
+		discountPrice: 800,
+		mrpPrice: 800,
+		unit: "BOX",
+		categorySlug: "gift-box",
+		imageUrl: img("Mega-Deluxe-BOX.jpg"),
+	},
+	{
+		name: "50 Items Gift Box",
+		discountPrice: 950,
+		mrpPrice: 950,
+		unit: "BOX",
+		categorySlug: "gift-box",
+		imageUrl: img("Mega-Deluxe-BOX.jpg"),
+	},
+
+	// ==== COMBO PACK ====
+	{
+		name: "3000 Childrens Combo",
 		discountPrice: 3000,
 		mrpPrice: 3000,
 		unit: "Case",
@@ -1708,7 +1784,7 @@ const PRODUCT_SEED: RawProduct[] = [
 async function seedProducts() {
 	const [existing] = await db.select().from(product).limit(1);
 	if (existing) {
-		console.log("✓ Products already exist, skipping");
+		console.log("\u2713 Products already exist, skipping");
 		return;
 	}
 
@@ -1723,7 +1799,7 @@ async function seedProducts() {
 		const categoryId = categoryIdBySlug.get(raw.categorySlug);
 		if (!categoryId) {
 			console.warn(
-				`⚠ Skipping "${raw.name}" — category "${raw.categorySlug}" not found`,
+				`\u26a0 Skipping "${raw.name}" \u2014 category "${raw.categorySlug}" not found`,
 			);
 			continue;
 		}
@@ -1733,8 +1809,7 @@ async function seedProducts() {
 
 		rows.push({
 			categoryId,
-			// inside seedProducts(), where rows are built:
-			code: String(nextCode++), // was: code: nextCode++,
+			code: String(nextCode++),
 			name: raw.name,
 			unit: raw.unit,
 			imageUrl: raw.imageUrl,
@@ -1758,7 +1833,7 @@ async function seedProducts() {
 	}
 
 	console.log(
-		`✓ Seeded ${totalInserted} products (out of ${PRODUCT_SEED.length} in catalog)`,
+		`\u2713 Seeded ${totalInserted} products (out of ${PRODUCT_SEED.length} in catalog)`,
 	);
 }
 

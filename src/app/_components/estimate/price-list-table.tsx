@@ -67,10 +67,10 @@ export function PriceListTable({ categoryId, search }: PriceListTableProps) {
 							Product name
 						</th>
 						<th className="w-28 px-4 py-3 text-right font-black text-base">
-							MRP price
+							MRP Price
 						</th>
 						<th className="w-32 px-4 py-3 text-right font-black text-base">
-							Discount price
+							Discount Price
 						</th>
 						<th className="w-28 px-4 py-3 text-center font-black text-base">
 							Qty

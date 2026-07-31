@@ -38,8 +38,8 @@ export function CategoryFilterBar({
 	const cart = useCart();
 
 	return (
-		<div className="sticky top-[100px] z-20 flex flex-col gap-3 rounded-lg bg-[#14163A] p-4 text-white shadow-md sm:flex-row sm:items-center sm:justify-between">
-			<div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+		<div className="sticky top-[100px] z-20 flex flex-col gap-4 rounded-lg bg-[#14163A] p-4 text-white shadow-md sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<Select
 					onValueChange={(value) =>
 						onCategoryChange(value === "all" ? null : value)
@@ -67,7 +67,7 @@ export function CategoryFilterBar({
 				/>
 			</div>
 
-			<div className="flex items-center justify-between gap-6 text-sm sm:justify-end">
+			<div className="flex items-center gap-6 text-sm">
 				<div className="flex gap-5">
 					<Stat label="Net total" value={cart.netTotal} />
 					<Stat accent label="You save" value={cart.youSave} />
