@@ -75,7 +75,7 @@ export function PriceListTable({ categoryId, search }: PriceListTableProps) {
 						<th className="w-28 px-4 py-3 text-center font-black text-base">
 							Qty
 						</th>
-						<th className="w-32 px-4 py-3 text-right font-black text-base">
+						<th className="w-32 px-4 py-3 text-center font-black text-base">
 							Total
 						</th>
 					</tr>

@@ -64,7 +64,7 @@ export function PriceListRow({
 					value={quantity === 0 ? "" : quantity}
 				/>
 			</td>
-			<td className="px-4 py-3 text-right font-bold text-[#14163A]">
+			<td className="px-4 py-3 text-center font-bold text-[#14163A]">
 				{lineTotal > 0 ? `₹${lineTotal.toFixed(2)}` : "—"}
 			</td>
 		</tr>

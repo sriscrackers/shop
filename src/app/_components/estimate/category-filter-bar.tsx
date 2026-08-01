@@ -38,7 +38,7 @@ export function CategoryFilterBar({
 	const cart = useCart();
 
 	return (
-		<div className="sticky top-[100px] z-20 flex flex-col gap-4 rounded-lg bg-[#14163A] p-4 text-white shadow-md sm:flex-row sm:items-center sm:justify-between">
+		<div className="sticky top-[100px] z-20 flex flex-col gap-4 rounded-lg bg-[#14163A] p-4 text-white shadow-md sm:flex-row sm:items-center">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 				<Select
 					onValueChange={(value) =>
@@ -67,27 +67,26 @@ export function CategoryFilterBar({
 				/>
 			</div>
 
-			<div className="flex items-center gap-6 text-sm">
-				<div className="flex gap-5">
-					<Stat label="Net total" value={cart.netTotal} />
-					<Stat accent label="You save" value={cart.youSave} />
-					<Stat bold label="Total" value={cart.grandTotal} />
-				</div>
-
-				<button
-					aria-label="View cart"
-					className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#D9A640] text-[#14163A] transition hover:scale-105"
-					onClick={onCartClick}
-					type="button"
-				>
-					<ShoppingCart className="h-5 w-5" />
-					{cart.itemCount > 0 ? (
-						<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#C8202F] font-bold text-[11px] text-white">
-							{cart.itemCount}
-						</span>
-					) : null}
-				</button>
+			{/* Evenly spaced between the search box and the cart icon */}
+			<div className="flex flex-1 items-center justify-evenly">
+				<Stat label="Net total" value={cart.netTotal} />
+				<Stat accent label="You save" value={cart.youSave} />
+				<Stat bold label="Total" value={cart.grandTotal} />
 			</div>
+
+			<button
+				aria-label="View cart"
+				className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#D9A640] text-[#14163A] transition hover:scale-105"
+				onClick={onCartClick}
+				type="button"
+			>
+				<ShoppingCart className="h-5 w-5" />
+				{cart.itemCount > 0 ? (
+					<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#C8202F] font-bold text-[11px] text-white">
+						{cart.itemCount}
+					</span>
+				) : null}
+			</button>
 		</div>
 	);
 }
