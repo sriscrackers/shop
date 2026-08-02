@@ -1,6 +1,7 @@
 "use client";
 
 import { Mail, MapPin, Menu, Phone } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -84,8 +85,15 @@ export function SiteHeader(props: SiteHeaderProps) {
 
 			<div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-3">
 				<Link className="flex items-center gap-3" href="/">
-					<span className="grid h-11 w-11 place-items-center rounded-md bg-[var(--brand-navy)] font-bold text-[var(--brand-gold)] text-lg">
-						SS
+					<span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+						<Image
+							alt={`${props.shopName} logo`}
+							className="object-cover"
+							fill
+							priority
+							sizes="44px"
+							src="/logo.jpeg"
+						/>
 					</span>
 					<span className="leading-tight">
 						<span className="block font-extrabold text-foreground text-lg tracking-tight">

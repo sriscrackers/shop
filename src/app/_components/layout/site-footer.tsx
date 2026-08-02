@@ -1,4 +1,5 @@
 import { Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const QUICK_LINKS = [
@@ -29,8 +30,15 @@ export function SiteFooter(props: SiteFooterProps) {
 			<div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:grid-cols-2 lg:grid-cols-3">
 				<div className="space-y-4 lg:col-span-1">
 					<div className="flex items-center gap-3">
-						<span className="grid h-11 w-11 place-items-center rounded-md bg-white/10 font-bold text-[var(--brand-gold)] text-lg">
-							SS
+						<span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full">
+							<Image
+								alt={`${props.shopName} logo`}
+								className="object-cover"
+								fill
+								priority
+								sizes="44px"
+								src="/logo.jpeg"
+							/>
 						</span>
 						<span className="leading-tight">
 							<span className="block font-extrabold text-lg tracking-tight">
