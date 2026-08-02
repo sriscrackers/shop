@@ -5,8 +5,8 @@ import { leadRouter } from "@/server/api/routers/lead";
 import { orderRouter } from "@/server/api/routers/order";
 import { productRouter } from "@/server/api/routers/product";
 import { settingsRouter } from "@/server/api/routers/settings";
-import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 import { upiAccountRouter } from "@/server/api/routers/upi-account";
+import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 export const appRouter = createTRPCRouter({
 	category: categoryRouter,

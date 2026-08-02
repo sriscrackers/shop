@@ -237,23 +237,71 @@ async function seedBankAccounts() {
 // discountLabel is now per-category: 90% for regular catalog items,
 // null for Gift Box (fixed prices, no discount) and Combo Pack (fixed case prices).
 const CATEGORY_SEED = [
-	{ name: "One Sound Crackers", slug: "one-sound-crackers", discountLabel: "90% discount" },
-	{ name: "Flower Pots (10pcs)", slug: "flower-pots", discountLabel: "90% discount" },
-	{ name: "Ground Chakkars", slug: "ground-chakkars", discountLabel: "90% discount" },
+	{
+		name: "One Sound Crackers",
+		slug: "one-sound-crackers",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Flower Pots (10pcs)",
+		slug: "flower-pots",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Ground Chakkars",
+		slug: "ground-chakkars",
+		discountLabel: "90% discount",
+	},
 	{ name: "Sparklers", slug: "sparklers", discountLabel: "90% discount" },
-	{ name: "Pencil Sparkling Varieties", slug: "pencil-sparkling-varieties", discountLabel: "90% discount" },
+	{
+		name: "Pencil Sparkling Varieties",
+		slug: "pencil-sparkling-varieties",
+		discountLabel: "90% discount",
+	},
 	{ name: "Sky Rockets", slug: "sky-rockets", discountLabel: "90% discount" },
-	{ name: "Bijili Crackers", slug: "bijili-crackers", discountLabel: "90% discount" },
-	{ name: "Bomb Crackers", slug: "bomb-crackers", discountLabel: "90% discount" },
+	{
+		name: "Bijili Crackers",
+		slug: "bijili-crackers",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Bomb Crackers",
+		slug: "bomb-crackers",
+		discountLabel: "90% discount",
+	},
 	{ name: "Paper Bomb", slug: "paper-bomb", discountLabel: "90% discount" },
 	{ name: "Wala Garland", slug: "wala-garland", discountLabel: "90% discount" },
-	{ name: "Sky Night Celebration", slug: "sky-night-celebration", discountLabel: "90% discount" },
-	{ name: "Night Fancy Celebration", slug: "night-fancy-celebration", discountLabel: "90% discount" },
-	{ name: "Fancy Flower Balls", slug: "fancy-flower-balls", discountLabel: "90% discount" },
-	{ name: "Color Matches", slug: "color-matches", discountLabel: "90% discount" },
-	{ name: "Children Gun Items", slug: "children-gun-items", discountLabel: "90% discount" },
+	{
+		name: "Sky Night Celebration",
+		slug: "sky-night-celebration",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Night Fancy Celebration",
+		slug: "night-fancy-celebration",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Fancy Flower Balls",
+		slug: "fancy-flower-balls",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Color Matches",
+		slug: "color-matches",
+		discountLabel: "90% discount",
+	},
+	{
+		name: "Children Gun Items",
+		slug: "children-gun-items",
+		discountLabel: "90% discount",
+	},
 	{ name: "New Arrivals", slug: "new-arrivals", discountLabel: "90% discount" },
-	{ name: "New Arrivals 2026", slug: "new-arrivals-2026", discountLabel: "90% discount" },
+	{
+		name: "New Arrivals 2026",
+		slug: "new-arrivals-2026",
+		discountLabel: "90% discount",
+	},
 	{ name: "Gift Box (No Discount)", slug: "gift-box", discountLabel: null },
 	{ name: "Combo Pack", slug: "combo-pack", discountLabel: null },
 ] as const;
@@ -293,7 +341,6 @@ interface RawProduct {
 }
 
 const PRODUCT_SEED: RawProduct[] = [
-
 	// ==== ONE SOUND CRACKERS ====
 	{
 		name: "3½ Lakshmi",
@@ -301,7 +348,9 @@ const PRODUCT_SEED: RawProduct[] = [
 		mrpPrice: 130,
 		unit: "PKT",
 		categorySlug: "one-sound-crackers",
-		imageUrl: img("3-quarterhalfthree-quarter3-Lakshmi-PKT.jpg-Lakshmi-PKT.jpg"),
+		imageUrl: img(
+			"3-quarterhalfthree-quarter3-Lakshmi-PKT.jpg-Lakshmi-PKT.jpg",
+		),
 	},
 	{
 		name: "4 Lakshmi",
@@ -733,7 +782,9 @@ const PRODUCT_SEED: RawProduct[] = [
 		mrpPrice: 240,
 		unit: "BOX",
 		categorySlug: "pencil-sparkling-varieties",
-		imageUrl: img("1-quarterhalfthree-quarter1-Twinkling-star-BOX.jpg-Twinkling-star-BOX.jpg"),
+		imageUrl: img(
+			"1-quarterhalfthree-quarter1-Twinkling-star-BOX.jpg-Twinkling-star-BOX.jpg",
+		),
 	},
 	{
 		name: "4 Twinkling Star",
@@ -744,7 +795,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("4-Twinkling-Star-BOX.jpg"),
 	},
 	{
-		name: "7\" Pencil",
+		name: '7" Pencil',
 		discountPrice: 30,
 		mrpPrice: 300,
 		unit: "BOX",
@@ -752,7 +803,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("7-Pencil-BOX.jpg"),
 	},
 	{
-		name: "10\" Pencil",
+		name: '10" Pencil',
 		discountPrice: 60,
 		mrpPrice: 600,
 		unit: "BOX",
@@ -925,7 +976,9 @@ const PRODUCT_SEED: RawProduct[] = [
 		mrpPrice: 1200,
 		unit: "½ kg",
 		categorySlug: "paper-bomb",
-		imageUrl: img("Adiyal-quarterhalfthree-quarterAdiyal-Kg-BOX.jpg-Kg-BOX.jpg"),
+		imageUrl: img(
+			"Adiyal-quarterhalfthree-quarterAdiyal-Kg-BOX.jpg-Kg-BOX.jpg",
+		),
 	},
 	{
 		name: "Color Paper Vedi",
@@ -1113,7 +1166,9 @@ const PRODUCT_SEED: RawProduct[] = [
 		mrpPrice: 2500,
 		unit: "3 pcs",
 		categorySlug: "sky-night-celebration",
-		imageUrl: img("2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg"),
+		imageUrl: img(
+			"2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg",
+		),
 	},
 	{
 		name: "2½ Fancy",
@@ -1145,10 +1200,12 @@ const PRODUCT_SEED: RawProduct[] = [
 		mrpPrice: 6000,
 		unit: "2 pcs",
 		categorySlug: "sky-night-celebration",
-		imageUrl: img("2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg"),
+		imageUrl: img(
+			"2-quarterhalfthree-quarter2-Fancy-Pipe-3-Pcs-BOX.jpg-Fancy-Pipe-3-Pcs-BOX.jpg",
+		),
 	},
 	{
-		name: "4\" Fancy",
+		name: '4" Fancy',
 		discountPrice: 320,
 		mrpPrice: 3200,
 		unit: "BOX",
@@ -1156,7 +1213,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("4-Fancy-BOX.jpg"),
 	},
 	{
-		name: "4\" Fancy",
+		name: '4" Fancy',
 		discountPrice: 700,
 		mrpPrice: 7000,
 		unit: "2 pcs",
@@ -1164,7 +1221,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("4-Fancy-BOX.jpg"),
 	},
 	{
-		name: "5\" Mega Pipe",
+		name: '5" Mega Pipe',
 		discountPrice: 820,
 		mrpPrice: 8200,
 		unit: "2 pcs",
@@ -1252,7 +1309,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("10X10-Tail-Light-BOX.jpg"),
 	},
 	{
-		name: "20x2.5\" Thriller Set Grand",
+		name: '20x2.5" Thriller Set Grand',
 		discountPrice: 3200,
 		mrpPrice: 32000,
 		unit: "BOX",
@@ -1260,7 +1317,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("20-x-2.5Thriller-Set-Grand-BOX.jpg"),
 	},
 	{
-		name: "32x3.5\" Mega Thriller Set Grand",
+		name: '32x3.5" Mega Thriller Set Grand',
 		discountPrice: 4750,
 		mrpPrice: 47500,
 		unit: "BOX",
@@ -1278,7 +1335,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Asrafi-BOX.jpg"),
 	},
 	{
-		name: "4\" Angry Bird",
+		name: '4" Angry Bird',
 		discountPrice: 60,
 		mrpPrice: 600,
 		unit: "BOX",
@@ -1334,7 +1391,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
-		name: "2\" Sun Feast Multicolor",
+		name: '2" Sun Feast Multicolor',
 		discountPrice: 140,
 		mrpPrice: 1400,
 		unit: "BOX",
@@ -1390,7 +1447,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
-		name: "2\" Red And Green Shower",
+		name: '2" Red And Green Shower',
 		discountPrice: 135,
 		mrpPrice: 1350,
 		unit: "BOX",
@@ -1422,7 +1479,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Tin-Beer-Shower-BOX.jpg"),
 	},
 	{
-		name: "3\" Red Sun Shower",
+		name: '3" Red Sun Shower',
 		discountPrice: 210,
 		mrpPrice: 2100,
 		unit: "BOX",
@@ -1656,7 +1713,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Rotating-Sparklers-BOX.jpg"),
 	},
 	{
-		name: "90\" Watts",
+		name: '90" Watts',
 		discountPrice: 145,
 		mrpPrice: 1450,
 		unit: "BOX",
@@ -1672,7 +1729,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("Whistling-Wheel-5-Pcs-BOX.jpg"),
 	},
 	{
-		name: "4\" Pipe Wow Purple",
+		name: '4" Pipe Wow Purple',
 		discountPrice: 420,
 		mrpPrice: 4200,
 		unit: "BOX",
@@ -1680,7 +1737,7 @@ const PRODUCT_SEED: RawProduct[] = [
 		imageUrl: img("4-Pipe-Wow-Purple-BOX.jpg"),
 	},
 	{
-		name: "4\" Pipe Wow Orange",
+		name: '4" Pipe Wow Orange',
 		discountPrice: 420,
 		mrpPrice: 4200,
 		unit: "BOX",
