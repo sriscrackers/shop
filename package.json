@@ -4,6 +4,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
+		"type-check": "tsc --noEmit",
 		"build": "next build",
 		"check": "biome check .",
 		"check:unsafe": "biome check --write --unsafe .",
