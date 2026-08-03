@@ -7,7 +7,6 @@ export const env = createEnv({
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
-		BETTER_AUTH_URL: z.string().url(),
 		BETTER_AUTH_SECRET: z.string().min(16),
 		UPLOADTHING_TOKEN: z.string().optional(),
 		// used only by the one-off seed script, never read at runtime
@@ -19,7 +18,6 @@ export const env = createEnv({
 	runtimeEnv: {
 		DATABASE_URL: process.env.DATABASE_URL,
 		NODE_ENV: process.env.NODE_ENV,
-		BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
 		BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 		UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
 		INITIAL_ADMIN_EMAIL: process.env.INITIAL_ADMIN_EMAIL,
