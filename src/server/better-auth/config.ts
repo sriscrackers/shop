@@ -12,13 +12,6 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
-	socialProviders: {
-		github: {
-			clientId: env.BETTER_AUTH_GITHUB_CLIENT_ID as string,
-			clientSecret: env.BETTER_AUTH_GITHUB_CLIENT_SECRET as string,
-			redirectURI: `${env.BETTER_AUTH_URL}/api/auth/callback/github`,
-		},
-	},
 });
 
 export type Session = typeof auth.$Infer.Session;
