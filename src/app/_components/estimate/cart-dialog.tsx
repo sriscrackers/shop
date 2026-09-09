@@ -49,11 +49,11 @@ export function CartDialog({
 						<p className="text-sm">Add some crackers to get started.</p>
 					</div>
 				) : (
-					<ScrollArea className="max-h-80 pr-3">
+					<ScrollArea className="max-h-80 overflow-x-hidden pr-3">
 						<div className="space-y-3">
 							{cart.items.map((item) => (
 								<div
-									className="flex items-center gap-3 rounded-md border border-[#14163A]/10 p-3"
+									className="flex flex-wrap items-center gap-3 rounded-md border border-[#14163A]/10 p-3"
 									key={item.productId}
 								>
 									{item.imageUrl ? (
@@ -67,7 +67,7 @@ export function CartDialog({
 										<div className="h-12 w-12 shrink-0 rounded-md bg-[#14163A]/5" />
 									)}
 
-									<div className="min-w-0 flex-1">
+									<div className="min-w-[120px] flex-1 basis-32">
 										<p className="truncate font-semibold text-[#14163A] text-sm">
 											{item.name}
 										</p>
@@ -76,7 +76,7 @@ export function CartDialog({
 										</p>
 									</div>
 
-									<div className="flex items-center gap-1.5">
+									<div className="flex shrink-0 items-center gap-1.5">
 										<Button
 											aria-label="Decrease quantity"
 											className="h-7 w-7"
@@ -104,7 +104,7 @@ export function CartDialog({
 										</Button>
 									</div>
 
-									<p className="w-16 shrink-0 text-right font-semibold text-[#14163A] text-sm">
+									<p className="shrink-0 text-right font-semibold text-[#14163A] text-sm">
 										₹
 										{(Number(item.discountPrice) * item.quantity).toFixed(2)}
 									</p>
