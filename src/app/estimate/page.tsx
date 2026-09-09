@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { CartDialog } from "@/app/_components/estimate/cart-dialog";
 import { CartSummaryBar } from "@/app/_components/estimate/cart-summary-bar";
 import { CategoryFilterBar } from "@/app/_components/estimate/category-filter-bar";
 import { CheckoutDialog } from "@/app/_components/estimate/checkout-dialog";
@@ -13,6 +14,7 @@ export default function EstimatePage() {
 	const searchParams = useSearchParams();
 	const [categoryId, setCategoryId] = useState<string | null>(null);
 	const [search, setSearch] = useState("");
+	const [cartOpen, setCartOpen] = useState(false);
 	const [checkoutOpen, setCheckoutOpen] = useState(false);
 
 	const { data: categories = [] } = api.category.list.useQuery();
@@ -47,7 +49,7 @@ export default function EstimatePage() {
 			<CategoryFilterBar
 				categories={categories}
 				categoryId={categoryId}
-				onCartClick={() => setCheckoutOpen(true)}
+				onCartClick={() => setCartOpen(true)}
 				onCategoryChange={setCategoryId}
 				onSearchChange={setSearch}
 				search={search}
@@ -57,7 +59,17 @@ export default function EstimatePage() {
 
 			<CartSummaryBar
 				minimumOrderAmount={minimumOrderAmount}
-				onCheckout={() => setCheckoutOpen(true)}
+				onCheckout={() => setCartOpen(true)}
+			/>
+
+			<CartDialog
+				minimumOrderAmount={minimumOrderAmount}
+				onOpenChange={setCartOpen}
+				onPlaceOrder={() => {
+					setCartOpen(false);
+					setCheckoutOpen(true);
+				}}
+				open={cartOpen}
 			/>
 			<CheckoutDialog onOpenChange={setCheckoutOpen} open={checkoutOpen} />
 		</div>

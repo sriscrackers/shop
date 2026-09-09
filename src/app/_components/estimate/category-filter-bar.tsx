@@ -1,7 +1,5 @@
 "use client";
 
-import { ShoppingCart } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
 import {
 	Select,
@@ -36,6 +34,7 @@ export function CategoryFilterBar({
 	onCartClick,
 }: CategoryFilterBarProps) {
 	const cart = useCart();
+	const hasItems = cart.itemCount > 0;
 
 	return (
 		<div className="sticky top-[100px] z-20 flex flex-col gap-4 rounded-lg bg-[#14163A] p-4 text-white shadow-md sm:flex-row sm:items-center">
@@ -67,7 +66,7 @@ export function CategoryFilterBar({
 				/>
 			</div>
 
-			{/* Evenly spaced between the search box and the cart icon */}
+			{/* Evenly spaced between the search box and the place order button */}
 			<div className="flex flex-1 items-center justify-evenly">
 				<Stat label="Net total" value={cart.netTotal} />
 				<Stat accent label="You save" value={cart.youSave} />
@@ -75,17 +74,17 @@ export function CategoryFilterBar({
 			</div>
 
 			<button
-				aria-label="View cart"
-				className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#D9A640] text-[#14163A] transition hover:scale-105"
+				className={cn(
+					"shrink-0 whitespace-nowrap rounded-full px-5 py-2.5 font-semibold text-sm transition",
+					hasItems
+						? "bg-[#C8202F] text-white hover:bg-[#a81b27]"
+						: "cursor-not-allowed bg-white/10 text-white/40",
+				)}
+				disabled={!hasItems}
 				onClick={onCartClick}
 				type="button"
 			>
-				<ShoppingCart className="h-5 w-5" />
-				{cart.itemCount > 0 ? (
-					<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#C8202F] font-bold text-[11px] text-white">
-						{cart.itemCount}
-					</span>
-				) : null}
+				Place Order{hasItems ? ` · ₹${cart.grandTotal.toFixed(2)}` : ""}
 			</button>
 		</div>
 	);
