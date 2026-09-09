@@ -1,0 +1,1091 @@
+import { relations } from "drizzle-orm";
+import {
+	boolean,
+	index,
+	integer,
+	numeric,
+	pgEnum,
+	pgSequence,
+	pgTableCreator,
+	text,
+	timestamp,
+	uniqueIndex,
+} from "drizzle-orm/pg-core";
+
+export const createTable = pgTableCreator((name) => `cracker_${name}`);
+
+// ---------------- better-auth tables ----------------
+
+export const user = createTable("user", {
+	id: text("id").primaryKey(),
+	name: text("name").notNull(),
+	email: text("email").notNull().unique(),
+	emailVerified: boolean("email_verified").notNull().default(false),
+	image: text("image"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const session = createTable("session", {
+	id: text("id").primaryKey(),
+	expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+	token: text("token").notNull().unique(),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	ipAddress: text("ip_address"),
+	userAgent: text("user_agent"),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const account = createTable("account", {
+	id: text("id").primaryKey(),
+	accountId: text("account_id").notNull(),
+	providerId: text("provider_id").notNull(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	accessToken: text("access_token"),
+	refreshToken: text("refresh_token"),
+	idToken: text("id_token"),
+	accessTokenExpiresAt: timestamp("access_token_expires_at", {
+		withTimezone: true,
+	}),
+	refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+		withTimezone: true,
+	}),
+	scope: text("scope"),
+	password: text("password"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const verification = createTable("verification", {
+	id: text("id").primaryKey(),
+	identifier: text("identifier").notNull(),
+	value: text("value").notNull(),
+	expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+});
+
+// ---------------- enums & sequences ----------------
+
+export const orderStatusEnum = pgEnum("order_status", [
+	"pending",
+	"contacted",
+	"confirmed",
+	"cancelled",
+]);
+
+export const guestSessionStatusEnum = pgEnum("guest_session_status", [
+	"active",
+	"submitted",
+]);
+
+export const orderBillSeq = pgSequence("cracker_order_bill_seq", {
+	startWith: 1001,
+	increment: 1,
+});
+
+// ---------------- catalog ----------------
+
+// src/server/db/schema.ts — patch category:
+export const category = createTable("category", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	name: text("name").notNull(),
+	slug: text("slug").notNull().unique(),
+	discountLabel: text("discount_label"),
+	imageUrl: text("image_url"),
+	sortOrder: integer("sort_order").notNull().default(0),
+	isActive: boolean("is_active").notNull().default(true),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const product = createTable(
+	"product",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		categoryId: text("category_id")
+			.notNull()
+			.references(() => category.id, { onDelete: "cascade" }),
+
+		code: text("product_code").notNull(), // was: integer("product_code").notNull()
+		name: text("name").notNull(),
+		unit: text("unit").notNull().default("PKT"),
+		imageUrl: text("image_url"),
+		mrpPrice: numeric("mrp_price", { precision: 10, scale: 2 }).notNull(),
+		discountPrice: numeric("discount_price", {
+			precision: 10,
+			scale: 2,
+		}).notNull(),
+		sortOrder: integer("sort_order").notNull().default(0),
+		isActive: boolean("is_active").notNull().default(true),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [index("product_category_idx").on(t.categoryId)],
+);
+
+// ---------------- guest cart ----------------
+
+export const guestSession = createTable("guest_session", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	status: guestSessionStatusEnum("status").notNull().default("active"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	lastActiveAt: timestamp("last_active_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const cartItem = createTable(
+	"cart_item",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		guestSessionId: text("guest_session_id")
+			.notNull()
+			.references(() => guestSession.id, { onDelete: "cascade" }),
+		productId: text("product_id")
+			.notNull()
+			.references(() => product.id, { onDelete: "cascade" }),
+		quantity: integer("quantity").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+		updatedAt: timestamp("updated_at", { withTimezone: true })
+			.notNull()
+			.defaultNow(),
+	},
+	(t) => [
+		index("cart_item_session_idx").on(t.guestSessionId),
+		uniqueIndex("cart_item_session_product_uq").on(
+			t.guestSessionId,
+			t.productId,
+		),
+	],
+);
+
+// ---------------- orders / bills ----------------
+
+export const order = createTable("order", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	billNumber: text("bill_number").notNull().unique(),
+	guestSessionId: text("guest_session_id").references(() => guestSession.id, {
+		onDelete: "set null",
+	}),
+	customerName: text("customer_name").notNull(),
+	customerWhatsapp: text("customer_whatsapp").notNull(),
+	customerAddress: text("customer_address").notNull(),
+	customerState: text("customer_state").notNull(),
+	netTotal: numeric("net_total", { precision: 10, scale: 2 }).notNull(),
+	youSave: numeric("you_save", { precision: 10, scale: 2 }).notNull(),
+	grandTotal: numeric("grand_total", { precision: 10, scale: 2 }).notNull(),
+	status: orderStatusEnum("status").notNull().default("pending"),
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+export const orderItem = createTable(
+	"order_item",
+	{
+		id: text("id")
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		orderId: text("order_id")
+			.notNull()
+			.references(() => order.id, { onDelete: "cascade" }),
+		productId: text("product_id").references(() => product.id, {
+			onDelete: "set null",
+		}),
+		// snapshotted so historical bills stay accurate even if admin edits prices later
+		productCode: text("product_code").notNull(),
+		productName: text("product_name").notNull(),
+		unit: text("unit").notNull(),
+		mrpPrice: numeric("mrp_price", { precision: 10, scale: 2 }).notNull(),
+		discountPrice: numeric("discount_price", {
+			precision: 10,
+			scale: 2,
+		}).notNull(),
+		quantity: integer("quantity").notNull(),
+		lineTotal: numeric("line_total", { precision: 10, scale: 2 }).notNull(),
+	},
+	(t) => [index("order_item_order_idx").on(t.orderId)],
+);
+
+// ---------------- site config ----------------
+
+export const bankAccount = createTable("bank_account", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	bankName: text("bank_name").notNull(),
+	accountHolderName: text("account_holder_name").notNull(),
+	accountNumber: text("account_number").notNull(),
+	ifscCode: text("ifsc_code").notNull(),
+	branchName: text("branch_name"),
+	sortOrder: integer("sort_order").notNull().default(0),
+	isActive: boolean("is_active").notNull().default(true),
+});
+
+export const upiAccount = createTable("upi_account", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	label: text("label").notNull(), // e.g. "Google Pay"
+	upiId: text("upi_id"), // e.g. "9626965591@okicici" — optional, phone-only UPI is common
+	phoneNumber: text("phone_number").notNull(), // e.g. "9626965591"
+	sortOrder: integer("sort_order").notNull().default(0),
+	isActive: boolean("is_active").notNull().default(true),
+});
+
+export const siteSetting = createTable("site_setting", {
+	id: integer("id").primaryKey().default(1),
+	shopName: text("shop_name").notNull().default("Sri's Crackers Shop"),
+	shopAddress: text("shop_address"),
+	contactEmail: text("contact_email"),
+	announcementText: text("announcement_text"),
+	minimumOrderAmount: numeric("minimum_order_amount", {
+		precision: 10,
+		scale: 2,
+	})
+		.notNull()
+		.default("0"),
+	whatsappNumber: text("whatsapp_number"),
+	contactPhonePrimary: text("contact_phone_primary"),
+	contactPhoneSecondary: text("contact_phone_secondary"),
+	address: text("address"),
+	updatedAt: timestamp("updated_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+
+// ---------------- relations ----------------
+
+export const categoryRelations = relations(category, ({ many }) => ({
+	products: many(product),
+}));
+
+export const productRelations = relations(product, ({ one, many }) => ({
+	category: one(category, {
+		fields: [product.categoryId],
+		references: [category.id],
+	}),
+	cartItems: many(cartItem),
+}));
+
+export const guestSessionRelations = relations(guestSession, ({ many }) => ({
+	cartItems: many(cartItem),
+	orders: many(order),
+}));
+
+export const cartItemRelations = relations(cartItem, ({ one }) => ({
+	guestSession: one(guestSession, {
+		fields: [cartItem.guestSessionId],
+		references: [guestSession.id],
+	}),
+	product: one(product, {
+		fields: [cartItem.productId],
+		references: [product.id],
+	}),
+}));
+
+export const orderRelations = relations(order, ({ one, many }) => ({
+	guestSession: one(guestSession, {
+		fields: [order.guestSessionId],
+		references: [guestSession.id],
+	}),
+	items: many(orderItem),
+}));
+
+export const orderItemRelations = relations(orderItem, ({ one }) => ({
+	order: one(order, { fields: [orderItem.orderId], references: [order.id] }),
+	product: one(product, {
+		fields: [orderItem.productId],
+		references: [product.id],
+	}),
+}));
+
+export const lead = createTable("lead", {
+	id: text("id")
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	name: text("name").notNull(),
+	mobile: text("mobile").notNull(),
+	source: text("source"), // "home_popup" | "contact_page"
+	createdAt: timestamp("created_at", { withTimezone: true })
+		.notNull()
+		.defaultNow(),
+});
+import { TRPCError } from "@trpc/server";
+import { asc, eq } from "drizzle-orm";
+import { z } from "zod";
+
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	publicProcedure,
+} from "@/server/api/trpc";
+import { bankAccount } from "@/server/db/schema";
+
+const bankAccountInput = z.object({
+	bankName: z.string().min(1).max(120),
+	accountHolderName: z.string().min(1).max(120),
+	accountNumber: z.string().min(4).max(40),
+	ifscCode: z.string().min(4).max(20),
+	branchName: z.string().max(150).optional(),
+	sortOrder: z.number().int().default(0),
+	isActive: z.boolean().default(true),
+});
+
+export const bankAccountRouter = createTRPCRouter({
+	list: publicProcedure.query(({ ctx }) =>
+		ctx.db
+			.select()
+			.from(bankAccount)
+			.where(eq(bankAccount.isActive, true))
+			.orderBy(asc(bankAccount.sortOrder)),
+	),
+
+	adminList: protectedProcedure.query(({ ctx }) =>
+		ctx.db.select().from(bankAccount).orderBy(asc(bankAccount.sortOrder)),
+	),
+
+	create: protectedProcedure
+		.input(bankAccountInput)
+		.mutation(({ ctx, input }) =>
+			ctx.db.insert(bankAccount).values(input).returning(),
+		),
+
+	update: protectedProcedure
+		.input(bankAccountInput.partial().extend({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id, ...rest } = input;
+			const [updated] = await ctx.db
+				.update(bankAccount)
+				.set(rest)
+				.where(eq(bankAccount.id, id))
+				.returning();
+			if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
+			return updated;
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db.delete(bankAccount).where(eq(bankAccount.id, input.id));
+			return { success: true };
+		}),
+});
+import { TRPCError } from "@trpc/server";
+import { asc, eq } from "drizzle-orm";
+import { z } from "zod";
+
+import {
+	createTRPCRouter,
+	protectedProcedure,
+	publicProcedure,
+} from "@/server/api/trpc";
+import { upiAccount } from "@/server/db/schema";
+
+const upiAccountInput = z.object({
+	label: z.string().min(1).max(60),
+	upiId: z.string().max(80).optional(),
+	phoneNumber: z.string().min(10).max(15),
+	sortOrder: z.number().int().default(0),
+	isActive: z.boolean().default(true),
+});
+
+export const upiAccountRouter = createTRPCRouter({
+	list: publicProcedure.query(({ ctx }) =>
+		ctx.db
+			.select()
+			.from(upiAccount)
+			.where(eq(upiAccount.isActive, true))
+			.orderBy(asc(upiAccount.sortOrder)),
+	),
+
+	adminList: protectedProcedure.query(({ ctx }) =>
+		ctx.db.select().from(upiAccount).orderBy(asc(upiAccount.sortOrder)),
+	),
+
+	create: protectedProcedure
+		.input(upiAccountInput)
+		.mutation(({ ctx, input }) =>
+			ctx.db.insert(upiAccount).values(input).returning(),
+		),
+
+	update: protectedProcedure
+		.input(upiAccountInput.partial().extend({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const { id, ...rest } = input;
+			const [updated] = await ctx.db
+				.update(upiAccount)
+				.set(rest)
+				.where(eq(upiAccount.id, id))
+				.returning();
+			if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
+			return updated;
+		}),
+
+	delete: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			await ctx.db.delete(upiAccount).where(eq(upiAccount.id, input.id));
+			return { success: true };
+		}),
+});
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { api } from "@/trpc/react";
+
+const settingsFormSchema = z.object({
+	shopName: z.string().min(1).max(150),
+	shopAddress: z.string().max(500).optional().or(z.literal("")),
+	announcementText: z.string().max(300).optional().or(z.literal("")),
+	minimumOrderAmount: z.coerce.number().nonnegative(),
+	whatsappNumber: z.string().max(20).optional().or(z.literal("")),
+	contactPhonePrimary: z.string().max(20).optional().or(z.literal("")),
+	contactPhoneSecondary: z.string().max(20).optional().or(z.literal("")),
+	address: z.string().max(500).optional().or(z.literal("")),
+});
+
+type SettingsFormValues = z.infer<typeof settingsFormSchema>;
+
+export function SettingsForm() {
+	const utils = api.useUtils();
+	const { data: settings, isLoading } = api.settings.get.useQuery();
+
+	const form = useForm<SettingsFormValues>({
+		resolver: zodResolver(settingsFormSchema),
+		defaultValues: {
+			shopName: "",
+			shopAddress: "",
+			announcementText: "",
+			minimumOrderAmount: 0,
+			whatsappNumber: "",
+			contactPhonePrimary: "",
+			contactPhoneSecondary: "",
+			address: "",
+		},
+		values: settings
+			? {
+					shopName: settings.shopName ?? "",
+					shopAddress: settings.shopAddress ?? "",
+					announcementText: settings.announcementText ?? "",
+					minimumOrderAmount: Number(settings.minimumOrderAmount ?? 0),
+					whatsappNumber: settings.whatsappNumber ?? "",
+					contactPhonePrimary: settings.contactPhonePrimary ?? "",
+					contactPhoneSecondary: settings.contactPhoneSecondary ?? "",
+					address: settings.address ?? "",
+				}
+			: undefined,
+	});
+
+	const updateMutation = api.settings.update.useMutation({
+		onSuccess: () => void utils.settings.get.invalidate(),
+	});
+
+	if (isLoading)
+		return <div className="h-96 animate-pulse rounded-lg bg-[#14163A]/5" />;
+
+	return (
+		<div className="space-y-8">
+			<Card>
+				<CardHeader>
+					<CardTitle>Site settings</CardTitle>
+				</CardHeader>
+				<CardContent>
+					<Form {...form}>
+						<form
+							className="space-y-4"
+							onSubmit={form.handleSubmit((values) =>
+								updateMutation.mutate(values),
+							)}
+						>
+							<div className="grid grid-cols-2 gap-4">
+								<FormField
+									control={form.control}
+									name="shopName"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Shop name</FormLabel>
+											<FormControl>
+												<Input {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="minimumOrderAmount"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Minimum order amount (₹)</FormLabel>
+											<FormControl>
+												<Input step="0.01" type="number" {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<FormField
+								control={form.control}
+								name="shopAddress"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Shop address (shown on bills)</FormLabel>
+										<FormControl>
+											<Textarea rows={2} {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="announcementText"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Announcement bar text</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Welcome to SS Crackers Shop — 80% discount live!"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<div className="grid grid-cols-3 gap-4">
+								<FormField
+									control={form.control}
+									name="whatsappNumber"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>WhatsApp number</FormLabel>
+											<FormControl>
+												<Input {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="contactPhonePrimary"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Phone 1</FormLabel>
+											<FormControl>
+												<Input {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="contactPhoneSecondary"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Phone 2</FormLabel>
+											<FormControl>
+												<Input {...field} />
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</div>
+
+							<FormField
+								control={form.control}
+								name="address"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Footer address</FormLabel>
+										<FormControl>
+											<Textarea rows={2} {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							{updateMutation.error ? (
+								<p className="font-medium text-[#C8202F] text-sm">
+									{updateMutation.error.message}
+								</p>
+							) : null}
+
+							<Button
+								className="bg-[#14163A] hover:bg-[#1f2257]"
+								disabled={updateMutation.isPending}
+								type="submit"
+							>
+								{updateMutation.isPending ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									"Save settings"
+								)}
+							</Button>
+						</form>
+					</Form>
+				</CardContent>
+			</Card>
+
+			<BankAccountsManager />
+		</div>
+	);
+}
+
+const bankAccountSchema = z.object({
+	bankName: z.string().min(1, "Required"),
+	accountHolderName: z.string().min(1, "Required"),
+	accountNumber: z.string().min(4, "Required"),
+	ifscCode: z.string().min(4, "Required"),
+	branchName: z.string().optional().or(z.literal("")),
+});
+
+type BankAccountValues = z.infer<typeof bankAccountSchema>;
+
+function BankAccountsManager() {
+	const utils = api.useUtils();
+	const { data: accounts = [] } = api.bankAccount.adminList.useQuery();
+	const [adding, setAdding] = useState(false);
+
+	const form = useForm<BankAccountValues>({
+		resolver: zodResolver(bankAccountSchema),
+		defaultValues: {
+			bankName: "",
+			accountHolderName: "",
+			accountNumber: "",
+			ifscCode: "",
+			branchName: "",
+		},
+	});
+
+	const createMutation = api.bankAccount.create.useMutation({
+		onSuccess: () => {
+			void utils.bankAccount.adminList.invalidate();
+			setAdding(false);
+			form.reset();
+		},
+	});
+
+	const deleteMutation = api.bankAccount.delete.useMutation({
+		onSuccess: () => void utils.bankAccount.adminList.invalidate(),
+	});
+
+	return (
+		<Card>
+			<CardHeader className="flex flex-row items-center justify-between">
+				<CardTitle>Bank accounts</CardTitle>
+				{!adding ? (
+					<Button
+						className="gap-1.5"
+						onClick={() => setAdding(true)}
+						size="sm"
+						variant="outline"
+					>
+						<Plus className="h-4 w-4" />
+						Add account
+					</Button>
+				) : null}
+			</CardHeader>
+			<CardContent className="space-y-3">
+				{accounts.map((account) => (
+					<div
+						className="flex items-center justify-between gap-4 rounded-md border border-[#14163A]/10 px-4 py-3"
+						key={account.id}
+					>
+						<div className="text-sm">
+							<p className="font-semibold text-[#14163A]">{account.bankName}</p>
+							<p className="text-[#14163A]/60">
+								{account.accountHolderName} · A/C {account.accountNumber} · IFSC{" "}
+								{account.ifscCode}
+							</p>
+						</div>
+						<Button
+							aria-label="Delete bank account"
+							onClick={() => deleteMutation.mutate({ id: account.id })}
+							size="icon"
+							variant="ghost"
+						>
+							<Trash2 className="h-4 w-4 text-[#C8202F]" />
+						</Button>
+					</div>
+				))}
+
+				{adding ? (
+					<Form {...form}>
+						<form
+							className="grid grid-cols-2 gap-3 rounded-md border border-[#14163A]/20 border-dashed p-4"
+							onSubmit={form.handleSubmit((values) =>
+								createMutation.mutate(values),
+							)}
+						>
+							<FormField
+								control={form.control}
+								name="bankName"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Bank name</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="accountHolderName"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Account holder</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="accountNumber"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Account number</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="ifscCode"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>IFSC code</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="branchName"
+								render={({ field }) => (
+									<FormItem className="col-span-2">
+										<FormLabel>Branch (optional)</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<div className="col-span-2 flex gap-2">
+								<Button
+									className="bg-[#14163A] hover:bg-[#1f2257]"
+									disabled={createMutation.isPending}
+									size="sm"
+									type="submit"
+								>
+									Save account
+								</Button>
+								<Button
+									onClick={() => setAdding(false)}
+									size="sm"
+									type="button"
+									variant="ghost"
+								>
+									Cancel
+								</Button>
+							</div>
+						</form>
+					</Form>
+				) : null}
+			</CardContent>
+		</Card>
+	);
+}"use client";
+
+import { Check, Copy, Landmark } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+
+export interface BankAccountCardData {
+	bankName: string;
+	accountHolderName: string;
+	accountNumber: string;
+	ifscCode: string;
+	branchName: string | null;
+}
+
+export function BankAccountCard({ account }: { account: BankAccountCardData }) {
+	return (
+		<div className="rounded-xl border border-[#14163A]/10 bg-white p-6 shadow-sm">
+			<div className="flex items-center gap-3">
+				<span className="grid h-11 w-11 place-items-center rounded-full bg-[#14163A]/5 text-[#14163A]">
+					<Landmark className="h-5 w-5" />
+				</span>
+				<h3 className="font-bold text-[#14163A] text-lg">{account.bankName}</h3>
+			</div>
+
+			<dl className="mt-5 space-y-3 text-sm">
+				<Row label="Account holder" value={account.accountHolderName} />
+				<Row copyable label="Account number" value={account.accountNumber} />
+				<Row copyable label="IFSC code" value={account.ifscCode} />
+				{account.branchName ? (
+					<Row label="Branch" value={account.branchName} />
+				) : null}
+			</dl>
+		</div>
+	);
+}
+
+function Row({
+	label,
+	value,
+	copyable,
+}: {
+	label: string;
+	value: string;
+	copyable?: boolean;
+}) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		await navigator.clipboard.writeText(value);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 1500);
+	};
+
+	return (
+		<div className="flex items-center justify-between gap-3">
+			<div>
+				<dt className="text-[#14163A]/45 text-xs uppercase tracking-wide">
+					{label}
+				</dt>
+				<dd className="font-semibold text-[#14163A]">{value}</dd>
+			</div>
+			{copyable ? (
+				<Button
+					aria-label={`Copy ${label}`}
+					onClick={handleCopy}
+					size="icon"
+					variant="ghost"
+				>
+					{copied ? (
+						<Check className="h-4 w-4 text-emerald-500" />
+					) : (
+						<Copy className="h-4 w-4 text-[#14163A]/50" />
+					)}
+				</Button>
+			) : null}
+		</div>
+	);
+}
+"use client";
+
+import { Check, Copy, Smartphone } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+
+export interface UpiAccountCardData {
+	label: string;
+	upiId: string | null;
+	phoneNumber: string;
+}
+
+export function UpiAccountCard({ account }: { account: UpiAccountCardData }) {
+	return (
+		<div className="rounded-xl border border-[#14163A]/10 bg-white p-6 shadow-sm">
+			<div className="flex items-center gap-3">
+				<span className="grid h-11 w-11 place-items-center rounded-full bg-[#14163A]/5 text-[#14163A]">
+					<Smartphone className="h-5 w-5" />
+				</span>
+				<h3 className="font-bold text-[#14163A] text-lg">{account.label}</h3>
+			</div>
+
+			<dl className="mt-5 space-y-3 text-sm">
+				<Row copyable label="Phone number (UPI)" value={account.phoneNumber} />
+				{account.upiId ? (
+					<Row copyable label="UPI ID" value={account.upiId} />
+				) : null}
+			</dl>
+		</div>
+	);
+}
+
+function Row({
+	label,
+	value,
+	copyable,
+}: {
+	label: string;
+	value: string;
+	copyable?: boolean;
+}) {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		await navigator.clipboard.writeText(value);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 1500);
+	};
+
+	return (
+		<div className="flex items-center justify-between gap-3">
+			<div>
+				<dt className="text-[#14163A]/45 text-xs uppercase tracking-wide">
+					{label}
+				</dt>
+				<dd className="font-semibold text-[#14163A]">{value}</dd>
+			</div>
+			{copyable ? (
+				<Button
+					aria-label={`Copy ${label}`}
+					onClick={handleCopy}
+					size="icon"
+					variant="ghost"
+				>
+					{copied ? (
+						<Check className="h-4 w-4 text-emerald-500" />
+					) : (
+						<Copy className="h-4 w-4 text-[#14163A]/50" />
+					)}
+				</Button>
+			) : null}
+		</div>
+	);
+}
+import { SettingsForm } from "@/app/_components/admin/settings-form";
+
+export default function AdminSettingsPage() {
+	return (
+		<div className="space-y-6">
+			<div>
+				<h1 className="font-display font-extrabold text-2xl text-[#14163A]">
+					Settings
+				</h1>
+				<p className="text-[#14163A]/55 text-sm">
+					Manage shop info, announcement bar, and payment accounts.
+				</p>
+			</div>
+			<SettingsForm />
+		</div>
+	);
+}
+import { BankAccountCard } from "@/app/_components/payment/bank-account-card";
+import { UpiAccountCard } from "@/app/_components/payment/upi-account-card";
+import { api } from "@/trpc/server";
+
+export default async function PaymentPage() {
+	const [accounts, upiAccounts] = await Promise.all([
+		api.bankAccount.list(),
+		api.upiAccount.list(),
+	]);
+
+	const hasAny = accounts.length > 0 || upiAccounts.length > 0;
+
+	return (
+		<div className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
+			<div className="text-center">
+				<h1 className="font-extrabold text-3xl text-[#14163A] sm:text-4xl">
+					Payment details
+				</h1>
+				<p className="mx-auto mt-4 max-w-2xl text-[#14163A]/65">
+					Once your estimate is confirmed over a phone call, transfer the amount
+					to any account below and share the screenshot on WhatsApp to complete
+					your order.
+				</p>
+			</div>
+
+			{!hasAny ? (
+				<p className="mt-10 text-center text-[#14163A]/55 text-sm">
+					No payment methods have been added yet.
+				</p>
+			) : (
+				<div className="mt-10 grid gap-6 sm:grid-cols-2">
+					{accounts.map((account) => (
+						<BankAccountCard account={account} key={account.id} />
+					))}
+					{upiAccounts.map((account) => (
+						<UpiAccountCard account={account} key={account.id} />
+					))}
+				</div>
+			)}
+		</div>
+	);
+}

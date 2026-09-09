@@ -39,12 +39,22 @@ export function SettingsForm() {
 
 	const form = useForm<SettingsFormValues>({
 		resolver: zodResolver(settingsFormSchema),
+		defaultValues: {
+			shopName: "",
+			shopAddress: "",
+			announcementText: "",
+			minimumOrderAmount: 0,
+			whatsappNumber: "",
+			contactPhonePrimary: "",
+			contactPhoneSecondary: "",
+			address: "",
+		},
 		values: settings
 			? {
-					shopName: settings.shopName,
+					shopName: settings.shopName ?? "",
 					shopAddress: settings.shopAddress ?? "",
 					announcementText: settings.announcementText ?? "",
-					minimumOrderAmount: Number(settings.minimumOrderAmount),
+					minimumOrderAmount: Number(settings.minimumOrderAmount ?? 0),
 					whatsappNumber: settings.whatsappNumber ?? "",
 					contactPhonePrimary: settings.contactPhonePrimary ?? "",
 					contactPhoneSecondary: settings.contactPhoneSecondary ?? "",
@@ -213,6 +223,7 @@ export function SettingsForm() {
 			</Card>
 
 			<BankAccountsManager />
+			<UpiAccountsManager />
 		</div>
 	);
 }
@@ -376,6 +387,156 @@ function BankAccountsManager() {
 									type="submit"
 								>
 									Save account
+								</Button>
+								<Button
+									onClick={() => setAdding(false)}
+									size="sm"
+									type="button"
+									variant="ghost"
+								>
+									Cancel
+								</Button>
+							</div>
+						</form>
+					</Form>
+				) : null}
+			</CardContent>
+		</Card>
+	);
+}
+
+const upiAccountSchema = z.object({
+	label: z.string().min(1, "Required"),
+	upiId: z.string().optional().or(z.literal("")),
+	phoneNumber: z.string().min(10, "Enter a valid phone number").max(15),
+});
+
+type UpiAccountValues = z.infer<typeof upiAccountSchema>;
+
+function UpiAccountsManager() {
+	const utils = api.useUtils();
+	const { data: accounts = [] } = api.upiAccount.adminList.useQuery();
+	const [adding, setAdding] = useState(false);
+
+	const form = useForm<UpiAccountValues>({
+		resolver: zodResolver(upiAccountSchema),
+		defaultValues: {
+			label: "",
+			upiId: "",
+			phoneNumber: "",
+		},
+	});
+
+	const createMutation = api.upiAccount.create.useMutation({
+		onSuccess: () => {
+			void utils.upiAccount.adminList.invalidate();
+			setAdding(false);
+			form.reset();
+		},
+	});
+
+	const deleteMutation = api.upiAccount.delete.useMutation({
+		onSuccess: () => void utils.upiAccount.adminList.invalidate(),
+	});
+
+	return (
+		<Card>
+			<CardHeader className="flex flex-row items-center justify-between">
+				<CardTitle>UPI accounts</CardTitle>
+				{!adding ? (
+					<Button
+						className="gap-1.5"
+						onClick={() => setAdding(true)}
+						size="sm"
+						variant="outline"
+					>
+						<Plus className="h-4 w-4" />
+						Add UPI
+					</Button>
+				) : null}
+			</CardHeader>
+			<CardContent className="space-y-3">
+				{accounts.map((account) => (
+					<div
+						className="flex items-center justify-between gap-4 rounded-md border border-[#14163A]/10 px-4 py-3"
+						key={account.id}
+					>
+						<div className="text-sm">
+							<p className="font-semibold text-[#14163A]">{account.label}</p>
+							<p className="text-[#14163A]/60">
+								{account.upiId ? `${account.upiId} · ` : ""}
+								{account.phoneNumber}
+							</p>
+						</div>
+						<Button
+							aria-label="Delete UPI account"
+							onClick={() => deleteMutation.mutate({ id: account.id })}
+							size="icon"
+							variant="ghost"
+						>
+							<Trash2 className="h-4 w-4 text-[#C8202F]" />
+						</Button>
+					</div>
+				))}
+
+				{adding ? (
+					<Form {...form}>
+						<form
+							className="grid grid-cols-2 gap-3 rounded-md border border-[#14163A]/20 border-dashed p-4"
+							onSubmit={form.handleSubmit((values) =>
+								createMutation.mutate({
+									...values,
+									upiId: values.upiId || undefined,
+								}),
+							)}
+						>
+							<FormField
+								control={form.control}
+								name="label"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Label</FormLabel>
+										<FormControl>
+											<Input placeholder="Google Pay" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="phoneNumber"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Phone number</FormLabel>
+										<FormControl>
+											<Input {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="upiId"
+								render={({ field }) => (
+									<FormItem className="col-span-2">
+										<FormLabel>UPI ID (optional)</FormLabel>
+										<FormControl>
+											<Input placeholder="9626965591@okicici" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<div className="col-span-2 flex gap-2">
+								<Button
+									className="bg-[#14163A] hover:bg-[#1f2257]"
+									disabled={createMutation.isPending}
+									size="sm"
+									type="submit"
+								>
+									Save UPI
 								</Button>
 								<Button
 									onClick={() => setAdding(false)}
