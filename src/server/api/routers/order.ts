@@ -179,4 +179,17 @@ export const orderRouter = createTRPCRouter({
 			if (!updated) throw new TRPCError({ code: "NOT_FOUND" });
 			return updated;
 		}),
+
+	// permanently removes the order; orderItems cascade-delete via FK
+	delete: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			const [deleted] = await ctx.db
+				.delete(order)
+				.where(eq(order.id, input.id))
+				.returning();
+
+			if (!deleted) throw new TRPCError({ code: "NOT_FOUND" });
+			return { success: true };
+		}),
 });

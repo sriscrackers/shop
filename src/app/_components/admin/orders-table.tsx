@@ -2,7 +2,18 @@
 
 import { Download } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
 	Select,
 	SelectContent,
@@ -21,6 +32,7 @@ import {
 import { api } from "@/trpc/react";
 
 type OrderStatus = "pending" | "contacted" | "confirmed" | "cancelled";
+type SelectValueOption = OrderStatus | "delete";
 
 const STATUS_STYLES: Record<OrderStatus, string> = {
 	pending: "bg-amber-100 text-amber-800",
@@ -46,9 +58,33 @@ export function OrdersTable({ statusFilter }: OrdersTableProps) {
 		status: statusFilter,
 	});
 
+	const [pendingDelete, setPendingDelete] = useState<{
+		id: string;
+		billNumber: string;
+	} | null>(null);
+
 	const updateStatusMutation = api.order.updateStatus.useMutation({
 		onSuccess: () => void utils.order.list.invalidate(),
 	});
+
+	const deleteMutation = api.order.delete.useMutation({
+		onSuccess: () => {
+			void utils.order.list.invalidate();
+			setPendingDelete(null);
+		},
+	});
+
+	const handleValueChange = (
+		orderId: string,
+		billNumber: string,
+		value: SelectValueOption,
+	) => {
+		if (value === "delete") {
+			setPendingDelete({ id: orderId, billNumber });
+			return;
+		}
+		updateStatusMutation.mutate({ id: orderId, status: value });
+	};
 
 	if (isLoading) {
 		return (
@@ -125,10 +161,11 @@ export function OrdersTable({ statusFilter }: OrdersTableProps) {
 							<TableCell>
 								<Select
 									onValueChange={(value) =>
-										updateStatusMutation.mutate({
-											id: order.id,
-											status: value as OrderStatus,
-										})
+										handleValueChange(
+											order.id,
+											order.billNumber,
+											value as SelectValueOption,
+										)
 									}
 									value={order.status}
 								>
@@ -147,6 +184,12 @@ export function OrdersTable({ statusFilter }: OrdersTableProps) {
 												{status}
 											</SelectItem>
 										))}
+										<SelectItem
+											className="font-semibold text-[#C8202F]"
+											value="delete"
+										>
+											Delete
+										</SelectItem>
 									</SelectContent>
 								</Select>
 							</TableCell>
@@ -165,6 +208,42 @@ export function OrdersTable({ statusFilter }: OrdersTableProps) {
 					))}
 				</TableBody>
 			</Table>
+
+			<AlertDialog
+				onOpenChange={(open) => {
+					if (!open) setPendingDelete(null);
+				}}
+				open={pendingDelete !== null}
+			>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle>Delete this order?</AlertDialogTitle>
+						<AlertDialogDescription>
+							This will permanently delete order{" "}
+							<span className="font-semibold text-[#14163A]">
+								{pendingDelete?.billNumber}
+							</span>{" "}
+							and all its items. This action cannot be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel disabled={deleteMutation.isPending}>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction
+							className="bg-[#C8202F] hover:bg-[#a81b27]"
+							disabled={deleteMutation.isPending}
+							onClick={() => {
+								if (pendingDelete) {
+									deleteMutation.mutate({ id: pendingDelete.id });
+								}
+							}}
+						>
+							{deleteMutation.isPending ? "Deleting…" : "Delete order"}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }
