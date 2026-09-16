@@ -1,13 +1,14 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { CartDialog } from "@/app/_components/estimate/cart-dialog";
 import { CartSummaryBar } from "@/app/_components/estimate/cart-summary-bar";
 import { CategoryFilterBar } from "@/app/_components/estimate/category-filter-bar";
 import { CheckoutDialog } from "@/app/_components/estimate/checkout-dialog";
 import { PriceListTable } from "@/app/_components/estimate/price-list-table";
+import { useCart } from "@/hooks/use-cart";
 import { api } from "@/trpc/react";
 
 export default function EstimatePage() {
@@ -19,6 +20,18 @@ export default function EstimatePage() {
 
 	const { data: categories = [] } = api.category.list.useQuery();
 	const { data: settings } = api.settings.get.useQuery();
+
+	const cart = useCart();
+	// Reset the cart every time this page mounts (fresh visit, refresh, or
+	// navigating back to it) so quantities always start at zero. The ref
+	// guards against React 18 strict-mode double-invoking effects in dev.
+	const hasResetRef = useRef(false);
+	useEffect(() => {
+		if (hasResetRef.current) return;
+		hasResetRef.current = true;
+		cart.clear();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [cart.clear]);
 
 	useEffect(() => {
 		const slug = searchParams.get("category");
