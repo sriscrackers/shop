@@ -25,26 +25,26 @@ const SLIDES: Slide[] = [
 		headline: "Light up your Diwali with SS Crackers Shop",
 		subhead:
 			"Sivakasi-manufactured crackers at honest, manufacturer-direct prices.",
-		image: "/hero/double-diya.jpg",
+		image: "/hero/double-diya.png",
 	},
 	{
 		eyebrow: "Gift boxes",
 		headline: "Curated gift boxes for every budget",
 		subhead:
 			"From starter packs to family-sized hampers — all in one estimate.",
-		image: "/hero/right-purple.jpg",
+		image: "/hero/right-purple.png",
 	},
 	{
 		eyebrow: "Quality assured",
 		headline: "Certified materials, every single cracker",
 		subhead: "Strict factory norms, safe for the whole family to enjoy.",
-		image: "/hero/white-diya.jpg",
+		image: "/hero/white-diya.png",
 	},
 	{
 		eyebrow: "Festive offers",
 		headline: "Brighten every corner this Diwali",
 		subhead: "Wide range of sparklers, flower pots, and sky shots in stock.",
-		image: "/hero/simple-design.jpg",
+		image: "/hero/simple-design.png",
 	},
 ];
 
