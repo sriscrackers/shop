@@ -17,8 +17,7 @@ const settingsInput = z.object({
 	contactPhonePrimary: z.string().max(20).optional(),
 	contactPhoneSecondary: z.string().max(20).optional(),
 	address: z.string().max(500).optional(),
-	// src/server/api/routers/settings.ts — add to settingsInput:
-	contactEmail: z.string().email().optional().or(z.literal("")),
+	contactEmail: z.string().email("Enter a valid email"),
 });
 
 async function getOrCreateSettings(db: typeof import("@/server/db").db) {

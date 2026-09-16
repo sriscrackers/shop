@@ -25,6 +25,7 @@ const settingsFormSchema = z.object({
 	shopAddress: z.string().max(500).optional().or(z.literal("")),
 	announcementText: z.string().max(300).optional().or(z.literal("")),
 	minimumOrderAmount: z.coerce.number().nonnegative(),
+	contactEmail: z.string().email("Enter a valid email"),
 	whatsappNumber: z.string().max(20).optional().or(z.literal("")),
 	contactPhonePrimary: z.string().max(20).optional().or(z.literal("")),
 	contactPhoneSecondary: z.string().max(20).optional().or(z.literal("")),
@@ -44,6 +45,7 @@ export function SettingsForm() {
 			shopAddress: "",
 			announcementText: "",
 			minimumOrderAmount: 0,
+			contactEmail: "",
 			whatsappNumber: "",
 			contactPhonePrimary: "",
 			contactPhoneSecondary: "",
@@ -55,6 +57,7 @@ export function SettingsForm() {
 					shopAddress: settings.shopAddress ?? "",
 					announcementText: settings.announcementText ?? "",
 					minimumOrderAmount: Number(settings.minimumOrderAmount ?? 0),
+					contactEmail: settings.contactEmail ?? "",
 					whatsappNumber: settings.whatsappNumber ?? "",
 					contactPhonePrimary: settings.contactPhonePrimary ?? "",
 					contactPhoneSecondary: settings.contactPhoneSecondary ?? "",
@@ -136,6 +139,24 @@ export function SettingsForm() {
 										<FormControl>
 											<Input
 												placeholder="Welcome to SS Crackers Shop — 80% discount live!"
+												{...field}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="contactEmail"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Contact email</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="shop@example.com"
+												type="email"
 												{...field}
 											/>
 										</FormControl>
