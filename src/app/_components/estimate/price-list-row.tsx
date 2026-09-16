@@ -1,7 +1,6 @@
 "use client";
 
-import Image from "next/image";
-
+import { ClickableImage } from "@/app/_components/shared/clickable-image";
 import { Input } from "@/components/ui/input";
 
 export interface PriceListItem {
@@ -30,17 +29,13 @@ export function PriceListRow({
 	return (
 		<tr className="border-[#14163A]/8 border-b transition hover:bg-[#14163A]/[0.02]">
 			<td className="px-4 py-3">
-				<div className="h-12 w-12 overflow-hidden rounded-md border border-[#14163A]/10 bg-[#14163A]/5">
-					{item.imageUrl ? (
-						<Image
-							alt={item.name}
-							className="h-full w-full object-cover"
-							height={48}
-							src={item.imageUrl}
-							width={48}
-						/>
-					) : null}
-				</div>
+				<ClickableImage
+					alt={item.name}
+					containerClassName="h-12 w-12 overflow-hidden rounded-md border border-[#14163A]/10 bg-[#14163A]/5"
+					imageClassName="h-full w-full object-cover"
+					imageUrl={item.imageUrl}
+					size={48}
+				/>
 			</td>
 			<td className="px-4 py-3 font-medium text-[#14163A]/70">{item.code}</td>
 			<td className="px-4 py-3 text-center">

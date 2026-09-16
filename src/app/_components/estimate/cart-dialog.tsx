@@ -2,6 +2,7 @@
 
 import { Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 
+import { ClickableImage } from "@/app/_components/shared/clickable-image";
 import { Button } from "@/components/ui/button";
 import {
 	Dialog,
@@ -56,16 +57,13 @@ export function CartDialog({
 									className="flex flex-wrap items-center gap-3 rounded-md border border-[#14163A]/10 p-3"
 									key={item.productId}
 								>
-									{item.imageUrl ? (
-										// biome-ignore lint: plain img is fine for cart thumbnails
-										<img
-											alt={item.name}
-											className="h-12 w-12 shrink-0 rounded-md object-cover"
-											src={item.imageUrl}
-										/>
-									) : (
-										<div className="h-12 w-12 shrink-0 rounded-md bg-[#14163A]/5" />
-									)}
+									<ClickableImage
+										alt={item.name}
+										containerClassName="h-12 w-12 shrink-0 overflow-hidden rounded-md bg-[#14163A]/5"
+										imageClassName="h-full w-full object-cover"
+										imageUrl={item.imageUrl}
+										size={48}
+									/>
 
 									<div className="min-w-[120px] flex-1 basis-32">
 										<p className="truncate font-semibold text-[#14163A] text-sm">

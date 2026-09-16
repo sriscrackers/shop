@@ -1,7 +1,6 @@
 "use client";
 
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -9,6 +8,7 @@ import {
 	ProductFormDialog,
 	type ProductFormProduct,
 } from "@/app/_components/admin/product-form-dialog";
+import { ClickableImage } from "@/app/_components/shared/clickable-image";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -181,17 +181,13 @@ export default function AdminProductsPage() {
 							{products.map((product) => (
 								<TableRow key={product.id}>
 									<TableCell>
-										<div className="h-10 w-10 overflow-hidden rounded-md border border-[#14163A]/10 bg-[#14163A]/5">
-											{product.imageUrl ? (
-												<Image
-													alt={product.name}
-													className="h-full w-full object-cover"
-													height={40}
-													src={product.imageUrl}
-													width={40}
-												/>
-											) : null}
-										</div>
+										<ClickableImage
+											alt={product.name}
+											containerClassName="h-10 w-10 overflow-hidden rounded-md border border-[#14163A]/10 bg-[#14163A]/5"
+											imageClassName="h-full w-full object-cover"
+											imageUrl={product.imageUrl}
+											size={40}
+										/>
 									</TableCell>
 									<TableCell className="font-medium text-[#14163A]/70">
 										{product.code}
