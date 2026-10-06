@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 
 import { auth } from "@/server/better-auth";
 import { db } from "@/server/db";
-import { bankAccount, order, orderItem, siteSetting } from "@/server/db/schema";
+import { order, orderItem, siteSetting } from "@/server/db/schema";
 import { GUEST_SESSION_COOKIE } from "@/server/guest-session";
 import { OrderBillDocument } from "@/server/pdf/order-bill";
 
@@ -30,10 +30,9 @@ export async function GET(
 		return new Response("Forbidden", { status: 403 });
 	}
 
-	const [items, settingsRows, accounts] = await Promise.all([
+	const [items, settingsRows] = await Promise.all([
 		db.select().from(orderItem).where(eq(orderItem.orderId, id)),
 		db.select().from(siteSetting).where(eq(siteSetting.id, 1)).limit(1),
-		db.select().from(bankAccount).where(eq(bankAccount.isActive, true)),
 	]);
 	const settings = settingsRows[0];
 
@@ -49,7 +48,6 @@ export async function GET(
 				netTotal: found.netTotal,
 				youSave: found.youSave,
 				grandTotal: found.grandTotal,
-				// FIX APPLIED HERE: Map over items and convert productCode to string
 				items: items.map((item) => ({
 					...item,
 					productCode: String(item.productCode),
@@ -58,7 +56,6 @@ export async function GET(
 					name: settings?.shopName ?? "Sri's Crackers Shop",
 					address: settings?.shopAddress ?? null,
 				},
-				bankAccounts: accounts,
 			},
 		}),
 	);

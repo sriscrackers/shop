@@ -30,11 +30,11 @@ const styles = StyleSheet.create({
 		paddingVertical: 6,
 	},
 	cCode: { width: "8%", paddingHorizontal: 4 },
-	cName: { width: "42%", paddingHorizontal: 4 },
+	cName: { width: "38%", paddingHorizontal: 4 },
 	cQty: { width: "12%", textAlign: "right", paddingHorizontal: 4 },
-	cPrice: { width: "19%", textAlign: "right", paddingHorizontal: 4 },
-	cTotal: { width: "19%", textAlign: "right", paddingHorizontal: 4 },
-	totals: { marginTop: 12, alignSelf: "flex-end", width: "45%" },
+	cPrice: { width: "21%", textAlign: "right", paddingHorizontal: 4 },
+	cTotal: { width: "21%", textAlign: "right", paddingHorizontal: 4 },
+	totals: { marginTop: 12, alignSelf: "flex-end", width: "50%" },
 	totalRow: {
 		flexDirection: "row",
 		justifyContent: "space-between",
@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
 		paddingTop: 4,
 		marginTop: 4,
 	},
-	footer: { marginTop: 24, fontSize: 9, color: "#555" },
 });
 
 export interface OrderBillItem {
@@ -72,12 +71,6 @@ export interface OrderBillData {
 	grandTotal: string;
 	items: OrderBillItem[];
 	shop: { name: string; address: string | null };
-	bankAccounts: {
-		bankName: string;
-		accountHolderName: string;
-		accountNumber: string;
-		ifscCode: string;
-	}[];
 }
 
 export function OrderBillDocument({ data }: { data: OrderBillData }) {
@@ -122,8 +115,8 @@ export function OrderBillDocument({ data }: { data: OrderBillData }) {
 								{item.productName} ({item.unit})
 							</Text>
 							<Text style={styles.cQty}>{item.quantity}</Text>
-							<Text style={styles.cPrice}>₹{item.discountPrice}</Text>
-							<Text style={styles.cTotal}>₹{item.lineTotal}</Text>
+							<Text style={styles.cPrice}>Rs. {item.discountPrice}</Text>
+							<Text style={styles.cTotal}>Rs. {item.lineTotal}</Text>
 						</View>
 					))}
 				</View>
@@ -131,29 +124,17 @@ export function OrderBillDocument({ data }: { data: OrderBillData }) {
 				<View style={styles.totals}>
 					<View style={styles.totalRow}>
 						<Text>Net Total</Text>
-						<Text>₹{data.netTotal}</Text>
+						<Text>Rs. {data.netTotal}</Text>
 					</View>
 					<View style={styles.totalRow}>
 						<Text>You Save</Text>
-						<Text>-₹{data.youSave}</Text>
+						<Text>- Rs. {data.youSave}</Text>
 					</View>
 					<View style={[styles.totalRow, styles.grandTotal]}>
 						<Text>Grand Total</Text>
-						<Text>₹{data.grandTotal}</Text>
+						<Text>Rs. {data.grandTotal}</Text>
 					</View>
 				</View>
-
-				{data.bankAccounts.length > 0 ? (
-					<View style={styles.footer}>
-						<Text style={styles.sectionTitle}>Payment Details</Text>
-						{data.bankAccounts.map((acc) => (
-							<Text key={acc.accountNumber}>
-								{acc.bankName} — {acc.accountHolderName} — A/C{" "}
-								{acc.accountNumber} — IFSC {acc.ifscCode}
-							</Text>
-						))}
-					</View>
-				) : null}
 			</Page>
 		</Document>
 	);
